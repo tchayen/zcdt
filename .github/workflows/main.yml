@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zig:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            zig:
+              - '**/*.zig'
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "latest"
+      - name: Download, install zig and run WASM build
+        run: bun scripts/ci.ts

@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "vite": "vite",
+    "wasm": "zig build install wasm"
+  },
+  "dependencies": {
+    "vite": "^6.3.4"
+  },
+  "devDependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/tool-cache": "^2.0.2",
+    "@types/node": "^22.15.3"
+  }
+}
