@@ -2,3 +2,4 @@ node_modules/
 .zig-cache/
 web/bin/*
 .DS_Store
+.vite/
