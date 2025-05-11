@@ -3,7 +3,7 @@ import path from "node:path";
 import { exec } from "node:child_process";
 
 function zigWasmPlugin() {
-  const zigDir = path.resolve(__dirname, "../src");
+  const zigDir = path.resolve(__dirname, "../../src");
 
   return {
     name: "zig-wasm-watch",
@@ -33,6 +33,6 @@ function zigWasmPlugin() {
 export default defineConfig({
   plugins: [zigWasmPlugin()],
   server: {
-    fs: { allow: [".."] },
+    fs: { allow: ["../.."] },
   },
 });

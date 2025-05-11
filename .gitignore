@@ -1,5 +1,5 @@
 node_modules/
 .zig-cache/
-web/bin/*
+*.wasm
 .DS_Store
 .vite/

@@ -3,7 +3,7 @@
   "main": "index.html",
   "scripts": {
     "vite": "vite",
-    "wasm": "zig build install wasm"
+    "wasm": "zig build install wasm --prefix ."
   },
   "dependencies": {
     "vite": "^6.3.4"

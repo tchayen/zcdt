@@ -55,7 +55,7 @@ async function getZigCachePath() {
 }
 
 await installFromCacheOrDownloadZig();
-await exec.exec("zig", ["build", "install", "wasm", "--prefix", "web"]);
+await exec.exec("zig", ["build", "install", "wasm", "--prefix", "."]);
 
-const size = fs.statSync("web/bin/lib.wasm").size;
-core.info(`Size of web/bin/lib.wasm: ${size} bytes`);
+const size = fs.statSync("bin/lib.wasm").size;
+core.info(`Size of bin/lib.wasm: ${size} bytes`);
