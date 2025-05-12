@@ -1,5 +1,8 @@
 # zcdt
 
+> [!WARNING]
+> This library is in pre-release now as I am trying to figure out the setup with exports, examples etc. It will be considered ready to use when this warning is gone. However, the code is working and won't be subject to major changes so feel free to just poke with the internals if needed.
+
 A library for dynamic CDT (constrained Delaunay triangulation) in Zig. Maintains a stateful triangulation system optimized around operations of adding vertices, removing vertices and enforcing edges to exist. Uses static memory allocation for maximum performance.
 
 Based mostly on own research of computational geometry. I wrote a blog post about the process and origin of this library: [Handmade pathfinding mesh for games](https://tchayen.com/handmade-pathfinding-mesh-for-games). Final implementation similar to proposed by [Kallmann et al (2003)](https://infoscience.epfl.ch/server/api/core/bitstreams/7d6df859-c6df-42bd-935f-84f75380054b/content).

@@ -1,6 +1,6 @@
 .{
     .name = .zcdt,
-    .version = "1.0.0",
+    .version = "0.0.0",
     .fingerprint = 0x39aef11be10b4617,
     .minimum_zig_version = "0.14.0",
     .dependencies = .{},
