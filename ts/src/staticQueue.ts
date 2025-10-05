@@ -21,7 +21,9 @@ export class StaticQueue {
   }
 
   pop(): number | null {
-    if (this.length === 0) return null;
+    if (this.length === 0) {
+      return null;
+    }
     const value = this.values[this.begin];
     this.begin = (this.begin + 1) % this.capacity;
     this.length -= 1;

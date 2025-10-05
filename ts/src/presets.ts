@@ -1,4 +1,3 @@
-import type { Point } from "./types";
 import { P } from "./types";
 import { EdgeContext } from "./EdgeContext";
 import { square, insertPoint, enforceEdge, removePoint } from "./geometry";

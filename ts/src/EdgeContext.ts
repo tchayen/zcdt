@@ -2,7 +2,7 @@ import type { Point } from "./types";
 import { nullthrows as nt } from "./nullthrows";
 import { CAPACITY } from "./constants";
 
-export interface HalfEdgeInit {
+export interface HalfEdge {
   x: number;
   y: number;
   next?: number;
@@ -39,7 +39,7 @@ export class EdgeContext {
     }
   }
 
-  create(init: HalfEdgeInit): number {
+  create(init: HalfEdge): number {
     if (this.freeTop === 0) {
       throw new RangeError("EdgeContext: out of memory");
     }

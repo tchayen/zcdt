@@ -233,19 +233,6 @@ export function findSharedEdge(
   return -1;
 }
 
-function pushEdge(stack: StaticStack, edge: number): void {
-  stack.push(edge);
-}
-
-function createEdge(ctx: EdgeContext, origin: Point, fixed = false): number {
-  return ctx.create({ x: origin.x, y: origin.y, fixed });
-}
-
-function setTwinPair(ctx: EdgeContext, a: number, b: number): void {
-  ctx.setTwin(a, b);
-  ctx.setTwin(b, a);
-}
-
 function insertPointInEdge(
   ctx: EdgeContext,
   px: number,
@@ -257,34 +244,41 @@ function insertPointInEdge(
   const cd = mustNext(ctx, ac);
   const da = mustNext(ctx, cd);
 
-  const pd = createEdge(ctx, p);
-  const dp = createEdge(ctx, ctx.origin(da));
-  setTwinPair(ctx, pd, dp);
+  const pd = ctx.create({ x: p.x, y: p.y });
+  const dp = ctx.create({ x: ctx.origin(da).x, y: ctx.origin(da).y });
+  ctx.setTwin(pd, dp);
+  ctx.setTwin(dp, pd);
 
   ctx.setNext(ac, pd);
   ctx.setNext(pd, da);
 
-  const pc = createEdge(ctx, p, ctx.isFixed(ac));
+  const pc = ctx.create({ x: p.x, y: p.y, fixed: ctx.isFixed(ac) });
   ctx.setNext(pc, cd);
   ctx.setNext(dp, pc);
   ctx.setNext(cd, dp);
 
   insertStack.reset();
-  pushEdge(insertStack, cd);
-  pushEdge(insertStack, da);
+  insertStack.push(cd);
+  insertStack.push(da);
 
   const pa = ctx.getTwin(ac);
   if (pa !== -1) {
     ctx.setOrigin(pa, p);
     const ab = mustNext(ctx, pa);
 
-    const cp = createEdge(ctx, ctx.origin(cd), ctx.isFixed(pa));
-    setTwinPair(ctx, pc, cp);
+    const cp = ctx.create({
+      x: ctx.origin(cd).x,
+      y: ctx.origin(cd).y,
+      fixed: ctx.isFixed(pa),
+    });
+    ctx.setTwin(pc, cp);
+    ctx.setTwin(cp, pc);
 
     const bc = mustNext(ctx, ab);
-    const pb = createEdge(ctx, p);
-    const bp = createEdge(ctx, ctx.origin(bc));
-    setTwinPair(ctx, pb, bp);
+    const pb = ctx.create({ x: p.x, y: p.y });
+    const bp = ctx.create({ x: ctx.origin(bc).x, y: ctx.origin(bc).y });
+    ctx.setTwin(pb, bp);
+    ctx.setTwin(bp, pb);
 
     ctx.setNext(ab, bp);
     ctx.setNext(bp, pa);
@@ -293,8 +287,8 @@ function insertPointInEdge(
     ctx.setNext(pb, bc);
     ctx.setNext(bc, cp);
 
-    pushEdge(insertStack, ab);
-    pushEdge(insertStack, bc);
+    insertStack.push(ab);
+    insertStack.push(bc);
   }
 
   flipEdges(ctx, insertStack);
@@ -315,19 +309,22 @@ function insertPointInFace(
   const b = ctx.origin(bc);
   const c = ctx.origin(ca);
 
-  const pa = createEdge(ctx, p);
-  const ap = createEdge(ctx, a);
-  setTwinPair(ctx, pa, ap);
+  const pa = ctx.create({ x: p.x, y: p.y });
+  const ap = ctx.create({ x: a.x, y: a.y });
+  ctx.setTwin(pa, ap);
+  ctx.setTwin(ap, pa);
   ctx.setNext(pa, ab);
 
-  const pb = createEdge(ctx, p);
-  const bp = createEdge(ctx, b);
-  setTwinPair(ctx, pb, bp);
+  const pb = ctx.create({ x: p.x, y: p.y });
+  const bp = ctx.create({ x: b.x, y: b.y });
+  ctx.setTwin(pb, bp);
+  ctx.setTwin(bp, pb);
   ctx.setNext(pb, bc);
 
-  const pc = createEdge(ctx, p);
-  const cp = createEdge(ctx, c);
-  setTwinPair(ctx, pc, cp);
+  const pc = ctx.create({ x: p.x, y: p.y });
+  const cp = ctx.create({ x: c.x, y: c.y });
+  ctx.setTwin(pc, cp);
+  ctx.setTwin(cp, pc);
   ctx.setNext(pc, ca);
 
   ctx.setNext(ap, pc);
@@ -339,9 +336,9 @@ function insertPointInFace(
   ctx.setNext(ca, ap);
 
   insertStack.reset();
-  pushEdge(insertStack, ab);
-  pushEdge(insertStack, bc);
-  pushEdge(insertStack, ca);
+  insertStack.push(ab);
+  insertStack.push(bc);
+  insertStack.push(ca);
   flipEdges(ctx, insertStack);
 }
 
@@ -927,9 +924,10 @@ export function fillCavity(ctx: EdgeContext, boundary: GeometryRing): void {
     );
 
     if (isEar) {
-      const ca = createEdge(ctx, cPoint);
-      const ac = createEdge(ctx, aPoint);
-      setTwinPair(ctx, ca, ac);
+      const ca = ctx.create({ x: cPoint.x, y: cPoint.y });
+      const ac = ctx.create({ x: aPoint.x, y: aPoint.y });
+      ctx.setTwin(ca, ac);
+      ctx.setTwin(ac, ca);
 
       ctx.setNext(aEdge, bEdge);
       ctx.setNext(bEdge, ca);

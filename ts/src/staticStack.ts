@@ -17,7 +17,9 @@ export class StaticStack {
   }
 
   pop(): number | null {
-    if (this.top === 0) return null;
+    if (this.top === 0) {
+      return null;
+    }
     return this.values[--this.top] ?? null;
   }
 
