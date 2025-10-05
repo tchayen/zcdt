@@ -17,27 +17,27 @@ import { StaticRing } from "./StaticRing";
 import { StaticDeque } from "./StaticDeque";
 import { isConvexQuad, isDelaunay, getVertex } from "./edges";
 
-const assert = (condition: boolean, message: string): void => {
+function assert(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
   }
-};
+}
 
-const mustNext = (ctx: EdgeContext, edge: number): number => {
+function mustNext(ctx: EdgeContext, edge: number): number {
   const next = ctx.next[edge]!;
   if (next === -1) {
     throw new Error("Half-edge has no `next` reference");
   }
   return next;
-};
+}
 
-const mustTwin = (ctx: EdgeContext, edge: number): number => {
+function mustTwin(ctx: EdgeContext, edge: number): number {
   const twin = ctx.twin[edge]!;
   if (twin === -1) {
     throw new Error("Half-edge has no twin");
   }
   return twin;
-};
+}
 
 export function locatePoint(
   ctx: EdgeContext,
@@ -234,25 +234,25 @@ export function findSharedEdge(
   return -1;
 }
 
-const pushEdge = (stack: StaticStack, edge: number): void => {
+function pushEdge(stack: StaticStack, edge: number): void {
   stack.push(edge);
-};
+}
 
-const createEdge = (ctx: EdgeContext, origin: Point, fixed = false): number => {
+function createEdge(ctx: EdgeContext, origin: Point, fixed = false): number {
   return ctx.create({ x: origin.x, y: origin.y, fixed });
-};
+}
 
-const setTwinPair = (ctx: EdgeContext, a: number, b: number): void => {
+function setTwinPair(ctx: EdgeContext, a: number, b: number): void {
   ctx.setTwin(a, b);
   ctx.setTwin(b, a);
-};
+}
 
-const insertPointInEdge = (
+function insertPointInEdge(
   ctx: EdgeContext,
   px: number,
   py: number,
   edge: number,
-): void => {
+): void {
   const p = P(px, py);
   const ac = edge;
   const cd = mustNext(ctx, ac);
@@ -299,14 +299,14 @@ const insertPointInEdge = (
   }
 
   flipEdges(ctx, insertStack);
-};
+}
 
-const insertPointInFace = (
+function insertPointInFace(
   ctx: EdgeContext,
   px: number,
   py: number,
   edge: number,
-): void => {
+): void {
   const p = P(px, py);
   const ab = edge;
   const bc = mustNext(ctx, ab);
@@ -344,7 +344,7 @@ const insertPointInFace = (
   pushEdge(insertStack, bc);
   pushEdge(insertStack, ca);
   flipEdges(ctx, insertStack);
-};
+}
 
 export function insertPoint(ctx: EdgeContext, px: number, py: number): void {
   const start = ctx.any();
@@ -411,29 +411,89 @@ const boundaryRing = new GeometryRing();
 const insertStack = new GeometryStack();
 const destroyStack = new GeometryStack();
 
-const edgeLoopEdges = (
+function edgeLoopEdges(
   ctx: EdgeContext,
   edge: number,
-): [number, number, number] => {
+): [number, number, number] {
   const b = mustNext(ctx, edge);
   const c = mustNext(ctx, b);
   return [edge, b, c];
-};
+}
 
-const hasIntersection = (
+function hasIntersection(
   ctx: EdgeContext,
   edge: number,
   e1: Point,
   e2: Point,
-): boolean => {
+): boolean {
   const a = ctx.origin(edge);
   const b = ctx.origin(mustNext(ctx, edge));
   return intersect(a.x, a.y, b.x, b.y, e1.x, e1.y, e2.x, e2.y) !== null;
-};
+}
 
-const setNextSafe = (ctx: EdgeContext, edge: number, next: number): void => {
+function findStartEdgeForIntersect(
+  ctx: EdgeContext,
+  inTriangleEdge: number,
+  e1: Point,
+  e2: Point,
+): number {
+  const LIMIT = 20;
+  const start = getVertex(ctx, e1.x, e1.y, inTriangleEdge);
+  if (start === -1) {
+    throw new Error("E1NotAVertex");
+  }
+
+  let current = start;
+  let i = 0;
+  while (i < LIMIT) {
+    const [eA, eB, eC] = edgeLoopEdges(ctx, current);
+    if (
+      hasIntersection(ctx, eA, e1, e2) ||
+      hasIntersection(ctx, eB, e1, e2) ||
+      hasIntersection(ctx, eC, e1, e2)
+    ) {
+      return current;
+    }
+
+    const twin = ctx.getTwin(current);
+    if (twin === -1) {
+      break;
+    }
+    current = mustNext(ctx, twin);
+    if (current === start) {
+      break;
+    }
+    i += 1;
+  }
+
+  current = start;
+  while (i < LIMIT) {
+    const [eA, eB, eC] = edgeLoopEdges(ctx, current);
+    if (
+      hasIntersection(ctx, eA, e1, e2) ||
+      hasIntersection(ctx, eB, e1, e2) ||
+      hasIntersection(ctx, eC, e1, e2)
+    ) {
+      return current;
+    }
+
+    const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
+    if (next === -1) {
+      break;
+    }
+    current = next;
+    if (current === start) {
+      break;
+    }
+    i += 1;
+  }
+
+  return -1;
+}
+
+function setNextSafe(ctx: EdgeContext, edge: number, next: number): void {
   ctx.setNext(edge, next);
-};
+}
 
 export function getIntersecting(
   ctx: EdgeContext,
@@ -449,59 +509,7 @@ export function getIntersecting(
   }
 
   const LIMIT = 20;
-  const startEdge = (() => {
-    const start = getVertex(ctx, e1.x, e1.y, inTriangleEdge);
-    if (start === -1) {
-      throw new Error("E1NotAVertex");
-    }
-
-    let current = start;
-    let i = 0;
-    while (i < LIMIT) {
-      const [eA, eB, eC] = edgeLoopEdges(ctx, current);
-      if (
-        hasIntersection(ctx, eA, e1, e2) ||
-        hasIntersection(ctx, eB, e1, e2) ||
-        hasIntersection(ctx, eC, e1, e2)
-      ) {
-        return current;
-      }
-
-      const twin = ctx.getTwin(current);
-      if (twin === -1) {
-        break;
-      }
-      current = mustNext(ctx, twin);
-      if (current === start) {
-        break;
-      }
-      i += 1;
-    }
-
-    current = start;
-    while (i < LIMIT) {
-      const [eA, eB, eC] = edgeLoopEdges(ctx, current);
-      if (
-        hasIntersection(ctx, eA, e1, e2) ||
-        hasIntersection(ctx, eB, e1, e2) ||
-        hasIntersection(ctx, eC, e1, e2)
-      ) {
-        return current;
-      }
-
-      const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
-      if (next === -1) {
-        break;
-      }
-      current = next;
-      if (current === start) {
-        break;
-      }
-      i += 1;
-    }
-
-    return -1;
-  })();
+  const startEdge = findStartEdgeForIntersect(ctx, inTriangleEdge, e1, e2);
 
   if (startEdge === -1) {
     throw new Error("NoSuitableStartEdge");
@@ -537,14 +545,14 @@ export function getIntersecting(
   }
 }
 
-const markCrossing = (
+function markCrossing(
   ctx: EdgeContext,
   edge: number,
   e1x: number,
   e1y: number,
   e2x: number,
   e2y: number,
-): void => {
+): void {
   const LIMIT = 100;
   let current = edge;
   let i = 0;
@@ -612,7 +620,7 @@ const markCrossing = (
       break;
     }
   }
-};
+}
 
 export function enforceEdge(
   ctx: EdgeContext,
@@ -695,10 +703,11 @@ export function enforceEdge(
   }
 }
 
-const isBoundaryEdge = (ctx: EdgeContext, edge: number): boolean =>
-  ctx.getTwin(edge) === -1;
+function isBoundaryEdge(ctx: EdgeContext, edge: number): boolean {
+  return ctx.getTwin(edge) === -1;
+}
 
-const ringContains = (ring: GeometryRing, edge: number): boolean => {
+function ringContains(ring: GeometryRing, edge: number): boolean {
   const first = ring.first;
   if (first === -1) {
     return false;
@@ -711,17 +720,17 @@ const ringContains = (ring: GeometryRing, edge: number): boolean => {
     node = ring.nextOf(node);
   } while (node !== first);
   return false;
-};
+}
 
-const destroyEdgeIfInternal = (
+function destroyEdgeIfInternal(
   ctx: EdgeContext,
   edge: number,
   boundary: GeometryRing,
-): void => {
+): void {
   if (!isBoundaryEdge(ctx, edge) && !ringContains(boundary, edge)) {
     ctx.destroy(edge);
   }
-};
+}
 
 export function collectBoundary(
   ctx: EdgeContext,
@@ -852,6 +861,48 @@ export function removeCollinear(
   }
 }
 
+function computeIsEar(
+  ctx: EdgeContext,
+  boundary: GeometryRing,
+  aNode: number,
+  bNode: number,
+  cNode: number,
+  aPoint: Point,
+  bPoint: Point,
+  cPoint: Point,
+): boolean {
+  if (
+    orient2D(aPoint.x, aPoint.y, bPoint.x, bPoint.y, cPoint.x, cPoint.y) <= 0
+  ) {
+    return false;
+  }
+  let other = boundary.first;
+  if (other === -1) {
+    return true;
+  }
+  do {
+    if (other !== aNode && other !== bNode && other !== cNode) {
+      const p = ctx.origin(boundary.valueOf(other));
+      if (
+        inTriangle(
+          p.x,
+          p.y,
+          aPoint.x,
+          aPoint.y,
+          bPoint.x,
+          bPoint.y,
+          cPoint.x,
+          cPoint.y,
+        )
+      )
+        return false;
+    }
+    other = boundary.nextOf(other);
+  } while (other !== boundary.first);
+
+  return true;
+}
+
 export function fillCavity(ctx: EdgeContext, boundary: GeometryRing): void {
   assert(
     boundary.length() >= 3,
@@ -873,37 +924,16 @@ export function fillCavity(ctx: EdgeContext, boundary: GeometryRing): void {
     const bPoint = ctx.origin(bEdge);
     const cPoint = ctx.origin(cEdge);
 
-    const isEar = (() => {
-      if (
-        orient2D(aPoint.x, aPoint.y, bPoint.x, bPoint.y, cPoint.x, cPoint.y) <=
-        0
-      )
-        return false;
-
-      let other = boundary.first;
-      if (other === -1) return true;
-      do {
-        if (other !== aNode && other !== bNode && other !== cNode) {
-          const p = ctx.origin(boundary.valueOf(other));
-          if (
-            inTriangle(
-              p.x,
-              p.y,
-              aPoint.x,
-              aPoint.y,
-              bPoint.x,
-              bPoint.y,
-              cPoint.x,
-              cPoint.y,
-            )
-          )
-            return false;
-        }
-        other = boundary.nextOf(other);
-      } while (other !== boundary.first);
-
-      return true;
-    })();
+    const isEar = computeIsEar(
+      ctx,
+      boundary,
+      aNode,
+      bNode,
+      cNode,
+      aPoint,
+      bPoint,
+      cPoint,
+    );
 
     if (isEar) {
       const ca = createEdge(ctx, cPoint);
@@ -963,37 +993,4 @@ export function validate(ctx: EdgeContext): void {
       throw new Error("Fixed edge mismatch");
     }
   }
-}
-
-// Compatibility wrappers for Point-based API
-export function locatePointPoint(
-  ctx: EdgeContext,
-  p: Point,
-  start: number,
-): number | null {
-  return locatePoint(ctx, p.x, p.y, start);
-}
-
-export function insertPointPoint(ctx: EdgeContext, p: Point): void {
-  insertPoint(ctx, p.x, p.y);
-}
-
-export function findSharedEdgePoint(
-  ctx: EdgeContext,
-  edge: number,
-  e1: Point,
-  e2: Point,
-): number {
-  return findSharedEdge(ctx, edge, e1.x, e1.y, e2.x, e2.y);
-}
-
-export function enforceEdgePoint(ctx: EdgeContext, e1: Point, e2: Point): void {
-  enforceEdge(ctx, e1.x, e1.y, e2.x, e2.y);
-}
-
-export function removePointPoint(ctx: EdgeContext, p: Point): void {
-  boundaryRing.reset();
-  collectBoundary(ctx, boundaryRing, p.x, p.y);
-  removeCollinear(ctx, boundaryRing);
-  fillCavity(ctx, boundaryRing);
 }
