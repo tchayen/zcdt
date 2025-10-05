@@ -1,6 +1,6 @@
 import { orient2D, inCircle, pointsEqual } from "./checks";
 import type { Point } from "./types";
-import { EdgeContext } from "./edgeContext";
+import { EdgeContext } from "./EdgeContext";
 
 export function isConvexQuad(ctx: EdgeContext, edge: number): boolean {
   const twin = ctx.twin[edge]!;

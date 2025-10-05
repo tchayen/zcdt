@@ -10,7 +10,7 @@ import {
 } from "./checks";
 import type { Point } from "./types";
 import { P } from "./types";
-import { EdgeContext } from "./edgeContext";
+import { EdgeContext } from "./EdgeContext";
 import { StaticStack } from "./StaticStack";
 import { StaticQueue } from "./StaticQueue";
 import { StaticRing } from "./StaticRing";

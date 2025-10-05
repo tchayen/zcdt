@@ -1,6 +1,6 @@
 import type { Point } from "./types";
 import { insertPoint, enforceEdge } from "./geometry";
-import { EdgeContext } from "./edgeContext";
+import { EdgeContext } from "./EdgeContext";
 
 export function insertSquare(
   ctx: EdgeContext,

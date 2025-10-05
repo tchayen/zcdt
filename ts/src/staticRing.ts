@@ -12,7 +12,7 @@ export class StaticRing {
   private lastIndex = -1;
   size = 0;
 
-  constructor(private readonly capacity: number) {
+  constructor(public readonly capacity: number) {
     if (!Number.isInteger(capacity) || capacity <= 0) {
       throw new RangeError("StaticRing: capacity must be positive integer");
     }

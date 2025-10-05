@@ -4,7 +4,7 @@ export class StaticQueue {
   private end = 0;
   private length = 0;
 
-  constructor(private readonly capacity: number) {
+  constructor(public readonly capacity: number) {
     if (!Number.isInteger(capacity) || capacity <= 0) {
       throw new RangeError("StaticQueue: capacity must be positive integer");
     }

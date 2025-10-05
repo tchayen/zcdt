@@ -2,7 +2,7 @@ export class StaticStack {
   private readonly values: Int32Array;
   private top = 0;
 
-  constructor(private readonly capacity: number) {
+  constructor(public readonly capacity: number) {
     if (!Number.isInteger(capacity) || capacity <= 0) {
       throw new RangeError("StaticStack: capacity must be positive integer");
     }

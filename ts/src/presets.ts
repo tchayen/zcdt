@@ -1,6 +1,6 @@
 import type { Point } from "./types";
 import { P } from "./types";
-import { EdgeContext } from "./edgeContext";
+import { EdgeContext } from "./EdgeContext";
 import { square, insertPoint, enforceEdge, removePoint } from "./geometry";
 import { insertSquare, insertOctagon, insertPolygon } from "./utils";
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { EdgeContext } from "../src/edgeContext";
+import { EdgeContext } from "../src/EdgeContext";
 import { P } from "../src/types";
 import type { Point } from "../src/types";
 import {

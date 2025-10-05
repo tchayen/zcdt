@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { EdgeContext } from "../src/edgeContext";
+import { EdgeContext } from "../src/EdgeContext";
 import {
   playground,
   pointRemoval,
