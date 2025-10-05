@@ -175,6 +175,14 @@ export class EdgeContext {
     this.maxUsedIndex = -1;
   }
 
+  getCapacity(): number {
+    return this.capacity;
+  }
+
+  isInUse(index: number): boolean {
+    return index >= 0 && index < this.capacity && this.inUse[index] === 1;
+  }
+
   private assertInUse(index: number): void {
     if (index < 0 || index >= this.capacity || this.inUse[index] === 0) {
       throw new RangeError("EdgeContext: invalid edge");
