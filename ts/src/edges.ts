@@ -1,8 +1,10 @@
 import { orient2D, inCircle } from "./checks";
 import type { Point } from "./types";
 import { EdgeContext } from "./edgeContext";
+import { EPS } from "./constants";
 
-const pointsEqual = (a: Point, b: Point): boolean => a.x === b.x && a.y === b.y;
+const pointsEqual = (a: Point, b: Point): boolean =>
+  Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS;
 
 export const isConvexQuad = (ctx: EdgeContext, edge: number): boolean => {
   const twin = ctx.getTwin(edge);
@@ -41,9 +43,11 @@ export const getVertex = (ctx: EdgeContext, p: Point, edge: number): number => {
   const a = ctx.origin(edge);
   if (pointsEqual(a, p)) return edge;
   const bIdx = ctx.getNext(edge);
+  if (bIdx === -1) return -1;
   const b = ctx.origin(bIdx);
   if (pointsEqual(b, p)) return bIdx;
   const cIdx = ctx.getNext(bIdx);
+  if (cIdx === -1) return -1;
   const c = ctx.origin(cIdx);
   if (pointsEqual(c, p)) return cIdx;
   return -1;
