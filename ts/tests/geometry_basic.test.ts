@@ -15,9 +15,9 @@ const setupTriangle = () => {
   const b = P(1, 0);
   const c = P(0, 1);
 
-  const ab = edges.create({ origin: a });
-  const bc = edges.create({ origin: b });
-  const ca = edges.create({ origin: c });
+  const ab = edges.create({ x: a.x, y: a.y });
+  const bc = edges.create({ x: b.x, y: b.y });
+  const ca = edges.create({ x: c.x, y: c.y });
   edges.setNext(ab, bc);
   edges.setNext(bc, ca);
   edges.setNext(ca, ab);
@@ -45,16 +45,16 @@ describe("geometry basics", () => {
     const c = P(5, 5);
     const d = P(1, 6);
 
-    const ab = edges.create({ origin: a });
-    const bc = edges.create({ origin: b });
-    const ca = edges.create({ origin: c });
+    const ab = edges.create({ x: a.x, y: a.y });
+    const bc = edges.create({ x: b.x, y: b.y });
+    const ca = edges.create({ x: c.x, y: c.y });
     edges.setNext(ab, bc);
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    const ac = edges.create({ origin: a });
-    const cd = edges.create({ origin: c });
-    const da = edges.create({ origin: d });
+    const ac = edges.create({ x: a.x, y: a.y });
+    const cd = edges.create({ x: c.x, y: c.y });
+    const da = edges.create({ x: d.x, y: d.y });
     edges.setNext(ac, cd);
     edges.setNext(cd, da);
     edges.setNext(da, ac);

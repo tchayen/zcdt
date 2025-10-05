@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { StaticDeque } from "../src/staticDeque";
+import { StaticDeque } from "../src/StaticDeque";
 
 describe("StaticDeque", () => {
   test("push/pop front/back", () => {

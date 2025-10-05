@@ -3,7 +3,9 @@ export interface Point {
   y: number;
 }
 
-export const P = (x: number, y: number): Point => ({ x, y });
+export function P(x: number, y: number): Point {
+  return { x, y };
+}
 
 export interface HalfEdge {
   originX: number;

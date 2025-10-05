@@ -1,12 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { EdgeContext } from "../src/edgeContext";
 import { P } from "../src/types";
-import {
-  isConvexQuad,
-  isDelaunay,
-  getVertexPoint,
-  isEdgeEqualPoint,
-} from "../src/edges";
+import { isConvexQuad, isDelaunay, getVertex, isEdgeEqual } from "../src/edges";
 
 describe("edges helpers", () => {
   test("isConvexQuad", () => {
@@ -16,16 +11,16 @@ describe("edges helpers", () => {
     const c = P(1, 1);
     const d = P(0, 1);
 
-    const ab = edges.create({ origin: a });
-    const bc = edges.create({ origin: b });
-    const ca = edges.create({ origin: c });
+    const ab = edges.create({ x: a.x, y: a.y });
+    const bc = edges.create({ x: b.x, y: b.y });
+    const ca = edges.create({ x: c.x, y: c.y });
     edges.setNext(ab, bc);
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    const cd = edges.create({ origin: c });
-    const da = edges.create({ origin: d });
-    const ac = edges.create({ origin: a });
+    const cd = edges.create({ x: c.x, y: c.y });
+    const da = edges.create({ x: d.x, y: d.y });
+    const ac = edges.create({ x: a.x, y: a.y });
     edges.setNext(cd, da);
     edges.setNext(da, ac);
     edges.setNext(ac, cd);
@@ -43,16 +38,16 @@ describe("edges helpers", () => {
     const c = P(0, 100);
     const d = P(60, 80);
 
-    const ab = edges.create({ origin: a });
-    const bc = edges.create({ origin: b });
-    const ca = edges.create({ origin: c });
+    const ab = edges.create({ x: a.x, y: a.y });
+    const bc = edges.create({ x: b.x, y: b.y });
+    const ca = edges.create({ x: c.x, y: c.y });
     edges.setNext(ab, bc);
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    const ac = edges.create({ origin: a });
-    const cd = edges.create({ origin: c });
-    const da = edges.create({ origin: d });
+    const ac = edges.create({ x: a.x, y: a.y });
+    const cd = edges.create({ x: c.x, y: c.y });
+    const da = edges.create({ x: d.x, y: d.y });
     edges.setNext(ac, cd);
     edges.setNext(cd, da);
     edges.setNext(da, ac);
@@ -70,17 +65,18 @@ describe("edges helpers", () => {
     const b = P(1, 0);
     const c = P(0, 1);
 
-    const ab = edges.create({ origin: a });
-    const bc = edges.create({ origin: b });
-    const ca = edges.create({ origin: c });
+    const ab = edges.create({ x: a.x, y: a.y });
+    const bc = edges.create({ x: b.x, y: b.y });
+    const ca = edges.create({ x: c.x, y: c.y });
     edges.setNext(ab, bc);
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    expect(getVertexPoint(edges, a, ab)).toBe(ab);
-    expect(getVertexPoint(edges, b, ab)).toBe(bc);
-    expect(getVertexPoint(edges, c, ab)).toBe(ca);
-    expect(getVertexPoint(edges, P(2, 2), ab)).toBe(-1);
+    expect(getVertex(edges, a.x, a.y, ab)).toBe(ab);
+    expect(getVertex(edges, b.x, b.y, ab)).toBe(bc);
+    expect(getVertex(edges, c.x, c.y, ab)).toBe(ca);
+    const p = P(2, 2);
+    expect(getVertex(edges, p.x, p.y, ab)).toBe(-1);
   });
 
   test("isEdgeEqual", () => {
@@ -89,15 +85,15 @@ describe("edges helpers", () => {
     const b = P(1, 0);
     const c = P(0, 1);
 
-    const ab = edges.create({ origin: a });
-    const bc = edges.create({ origin: b });
-    const ca = edges.create({ origin: c });
+    const ab = edges.create({ x: a.x, y: a.y });
+    const bc = edges.create({ x: b.x, y: b.y });
+    const ca = edges.create({ x: c.x, y: c.y });
     edges.setNext(ab, bc);
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    expect(isEdgeEqualPoint(edges, ab, a, b)).toBe(true);
-    expect(isEdgeEqualPoint(edges, ab, b, a)).toBe(true);
-    expect(isEdgeEqualPoint(edges, ab, a, c)).toBe(false);
+    expect(isEdgeEqual(edges, ab, a.x, a.y, b.x, b.y)).toBe(true);
+    expect(isEdgeEqual(edges, ab, b.x, b.y, a.x, a.y)).toBe(true);
+    expect(isEdgeEqual(edges, ab, a.x, a.y, c.x, c.y)).toBe(false);
   });
 });

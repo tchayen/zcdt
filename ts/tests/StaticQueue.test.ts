@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { StaticQueue } from "../src/staticQueue";
+import { StaticQueue } from "../src/StaticQueue";
 
 describe("StaticQueue", () => {
   test("basic push/pop", () => {

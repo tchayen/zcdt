@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { StaticRing } from "../src/staticRing";
+import { StaticRing } from "../src/StaticRing";
 
 describe("StaticRing", () => {
   test("operations", () => {

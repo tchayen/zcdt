@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { StaticStack } from "../src/staticStack";
+import { StaticStack } from "../src/StaticStack";
 
 describe("StaticStack", () => {
   test("basic push/pop", () => {

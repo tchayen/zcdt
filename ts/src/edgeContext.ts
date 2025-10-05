@@ -3,19 +3,20 @@ import { nullthrows as nt } from "./nullthrows";
 import { CAPACITY } from "./constants";
 
 export interface HalfEdgeInit {
-  origin: Point;
+  x: number;
+  y: number;
   next?: number;
   twin?: number;
   fixed?: boolean;
 }
 
 export class EdgeContext {
-  private readonly originX: Float32Array;
-  private readonly originY: Float32Array;
-  private readonly next: Int32Array;
-  private readonly twin: Int32Array;
-  private readonly fixed: Uint8Array;
-  private readonly inUse: Uint8Array;
+  readonly originX: Float32Array;
+  readonly originY: Float32Array;
+  readonly next: Int32Array;
+  readonly twin: Int32Array;
+  readonly fixed: Uint8Array;
+  readonly inUse: Uint8Array;
   private readonly freeStack: Int32Array;
   private freeTop: number;
   private allocated = 0;
@@ -44,8 +45,8 @@ export class EdgeContext {
     }
     const index = nt(this.freeStack[--this.freeTop]);
     this.inUse[index] = 1;
-    this.originX[index] = init.origin.x;
-    this.originY[index] = init.origin.y;
+    this.originX[index] = init.x;
+    this.originY[index] = init.y;
     this.next[index] = init.next ?? -1;
     this.twin[index] = init.twin ?? -1;
     this.fixed[index] = init.fixed ? 1 : 0;
@@ -57,7 +58,6 @@ export class EdgeContext {
   }
 
   destroy(index: number): void {
-    this.assertInUse(index);
     this.inUse[index] = 0;
     this.fixed[index] = 0;
     this.next[index] = -1;
@@ -115,53 +115,43 @@ export class EdgeContext {
   }
 
   setOrigin(index: number, point: Point): void {
-    this.assertInUse(index);
     this.originX[index] = point.x;
     this.originY[index] = point.y;
   }
 
   origin(index: number): Point {
-    this.assertInUse(index);
     return { x: this.originX[index]!, y: this.originY[index]! };
   }
 
   originXAt(index: number): number {
-    this.assertInUse(index);
     return this.originX[index]!;
   }
 
   originYAt(index: number): number {
-    this.assertInUse(index);
     return this.originY[index]!;
   }
 
   setNext(index: number, nextIndex: number): void {
-    this.assertInUse(index);
     this.next[index] = nextIndex;
   }
 
   getNext(index: number): number {
-    this.assertInUse(index);
     return this.next[index]!;
   }
 
   setTwin(index: number, twinIndex: number): void {
-    this.assertInUse(index);
     this.twin[index] = twinIndex;
   }
 
   getTwin(index: number): number {
-    this.assertInUse(index);
     return this.twin[index]!;
   }
 
   isFixed(index: number): boolean {
-    this.assertInUse(index);
     return this.fixed[index] === 1;
   }
 
   setFixed(index: number, value: boolean): void {
-    this.assertInUse(index);
     this.fixed[index] = value ? 1 : 0;
   }
 
@@ -181,11 +171,5 @@ export class EdgeContext {
 
   isInUse(index: number): boolean {
     return index >= 0 && index < this.capacity && this.inUse[index] === 1;
-  }
-
-  private assertInUse(index: number): void {
-    if (index < 0 || index >= this.capacity || this.inUse[index] === 0) {
-      throw new RangeError("EdgeContext: invalid edge");
-    }
   }
 }

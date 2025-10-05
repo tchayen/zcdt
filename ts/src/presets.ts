@@ -4,7 +4,7 @@ import { EdgeContext } from "./edgeContext";
 import { square, insertPoint, enforceEdge, removePoint } from "./geometry";
 import { insertSquare, insertOctagon, insertPolygon } from "./utils";
 
-export const playground = (edges: EdgeContext): void => {
+export function playground(edges: EdgeContext): void {
   edges.reset();
   square(edges, 400, 400);
 
@@ -124,9 +124,9 @@ export const playground = (edges: EdgeContext): void => {
     P(37, 333),
     P(76, 326),
   ]);
-};
+}
 
-export const pointRemoval = (edges: EdgeContext): void => {
+export function pointRemoval(edges: EdgeContext): void {
   edges.reset();
   square(edges, 400, 400);
 
@@ -188,9 +188,9 @@ export const pointRemoval = (edges: EdgeContext): void => {
   // removePoint(edges, P(138, 221));
   // removePoint(edges, P(155, 256));
   removePoint(edges, 0, 333);
-};
+}
 
-export const selfIntersecting = (edges: EdgeContext): void => {
+export function selfIntersecting(edges: EdgeContext): void {
   edges.reset();
   square(edges, 100, 100);
 
@@ -205,9 +205,9 @@ export const selfIntersecting = (edges: EdgeContext): void => {
 
   insertSquare(edges, 90, 0, 10);
   insertSquare(edges, 20, 50, 30);
-};
+}
 
-export const grid = (edges: EdgeContext): void => {
+export function grid(edges: EdgeContext): void {
   edges.reset();
   for (let i = 0; i < edges.count(); i += 1) {
     edges.setFixed(i, false);
@@ -231,9 +231,9 @@ export const grid = (edges: EdgeContext): void => {
       enforceEdge(edges, x, y + 1, x, y);
     }
   }
-};
+}
 
-export const tinySquare = (edges: EdgeContext): void => {
+export function tinySquare(edges: EdgeContext): void {
   edges.reset();
   square(edges, 4, 4);
 
@@ -241,4 +241,4 @@ export const tinySquare = (edges: EdgeContext): void => {
   insertSquare(edges, 1, 0, 1);
 
   removePoint(edges, 0, 1);
-};
+}

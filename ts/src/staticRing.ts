@@ -100,7 +100,6 @@ export class StaticRing {
   }
 
   insertAfter(nodeIndex: number, value: number): number {
-    this.assertInUse(nodeIndex);
     const index = this.allocNode();
     this.values[index] = value;
 
@@ -119,8 +118,6 @@ export class StaticRing {
   }
 
   remove(nodeIndex: number): void {
-    this.assertInUse(nodeIndex);
-
     if (this.size === 1) {
       this.firstIndex = -1;
       this.lastIndex = -1;
@@ -165,17 +162,14 @@ export class StaticRing {
   }
 
   valueOf(index: number): number {
-    this.assertInUse(index);
     return this.values[index]!;
   }
 
   nextOf(index: number): number {
-    this.assertInUse(index);
     return this.next[index]!;
   }
 
   prevOf(index: number): number {
-    this.assertInUse(index);
     return this.prev[index]!;
   }
 
@@ -192,11 +186,5 @@ export class StaticRing {
       this.freeStack[i] = this.values.length - 1 - i;
     }
     this.freeTop = this.values.length;
-  }
-
-  private assertInUse(index: number): void {
-    if (index < 0 || index >= this.capacity || this.inUse[index] === 0) {
-      throw new RangeError("StaticRing: invalid node");
-    }
   }
 }

@@ -14,18 +14,8 @@ import {
 } from "../src/geometry";
 import { insertPoint } from "../src/geometry";
 import { insertSquare } from "../src/utils";
-import { getVertexPoint } from "../src/edges";
-
-const pointEquals = (
-  a: { x: number; y: number },
-  b: { x: number; y: number },
-): boolean => {
-  return Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6;
-};
-
-const getVertexIndex = (ctx: EdgeContext, p: Point, edge: number): number => {
-  return getVertexPoint(ctx, p, edge);
-};
+import { getVertex } from "../src/edges";
+import { pointsEqual } from "../src/checks";
 
 describe("geometry advanced functions", () => {
   test("getIntersecting finds edges crossing segment", () => {
@@ -60,7 +50,7 @@ describe("geometry advanced functions", () => {
     const e2 = P(20, 45);
     const tri = locatePoint(edges, e1.x, e1.y, edges.any());
     expect(tri).not.toBeNull();
-    const start = getVertexIndex(edges, e1, tri!);
+    const start = getVertex(edges, e1.x, e1.y, tri!);
     expect(start).not.toBe(-1);
     getIntersecting(edges, queue2, start, e1, e2);
 
@@ -68,8 +58,8 @@ describe("geometry advanced functions", () => {
     expect(popped).not.toBeNull();
     const origin = edges.origin(popped!);
     const dest = edges.origin(edges.getNext(popped!));
-    expect(pointEquals(origin, P(10, 70))).toBe(true);
-    expect(pointEquals(dest, P(30, 40))).toBe(true);
+    expect(pointsEqual(origin.x, origin.y, 10, 70)).toBe(true);
+    expect(pointsEqual(dest.x, dest.y, 30, 40)).toBe(true);
     expect(queue2.pop()).toBeNull();
   });
 
