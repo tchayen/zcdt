@@ -241,7 +241,7 @@ function runBenchmark() {
   console.log("================================================");
   results.forEach((result) => {
     console.log(
-      `${result.name.padEnd(16)} | ${result.duration
+      `${result.name.padEnd(20)} | ${result.duration
         .toFixed(2)
         .padStart(8)}ms | ${result.edges.toString().padStart(6)} edges | ${(
         (result.edges / result.duration) *
