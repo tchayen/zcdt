@@ -1,11 +1,7 @@
 import type { Point } from "./types";
 import { EPS } from "./constants";
 
-export const orient2D = (a: Point, b: Point, c: Point): number => {
-  return orient2DCoords(a.x, a.y, b.x, b.y, c.x, c.y);
-};
-
-export const orient2DCoords = (
+export const orient2D = (
   ax: number,
   ay: number,
   bx: number,
@@ -17,15 +13,6 @@ export const orient2DCoords = (
 };
 
 export const inTriangle = (
-  p: Point,
-  e1: Point,
-  e2: Point,
-  e3: Point,
-): boolean => {
-  return inTriangleCoords(p.x, p.y, e1.x, e1.y, e2.x, e2.y, e3.x, e3.y);
-};
-
-export const inTriangleCoords = (
   px: number,
   py: number,
   e1x: number,
@@ -36,17 +23,13 @@ export const inTriangleCoords = (
   e3y: number,
 ): boolean => {
   return (
-    orient2DCoords(e1x, e1y, e2x, e2y, px, py) > -EPS &&
-    orient2DCoords(e2x, e2y, e3x, e3y, px, py) > -EPS &&
-    orient2DCoords(e3x, e3y, e1x, e1y, px, py) > -EPS
+    orient2D(e1x, e1y, e2x, e2y, px, py) > -EPS &&
+    orient2D(e2x, e2y, e3x, e3y, px, py) > -EPS &&
+    orient2D(e3x, e3y, e1x, e1y, px, py) > -EPS
   );
 };
 
-export const inCircle = (p: Point, t1: Point, t2: Point, t3: Point): number => {
-  return inCircleCoords(p.x, p.y, t1.x, t1.y, t2.x, t2.y, t3.x, t3.y);
-};
-
-export const inCircleCoords = (
+export const inCircle = (
   px: number,
   py: number,
   t1x: number,
@@ -73,15 +56,6 @@ export const inCircleCoords = (
 };
 
 export const doCross = (
-  s1: Point,
-  s2: Point,
-  t1: Point,
-  t2: Point,
-): boolean => {
-  return doCrossCoords(s1.x, s1.y, s2.x, s2.y, t1.x, t1.y, t2.x, t2.y);
-};
-
-export const doCrossCoords = (
   s1x: number,
   s1y: number,
   s2x: number,
@@ -91,10 +65,10 @@ export const doCrossCoords = (
   t2x: number,
   t2y: number,
 ): boolean => {
-  const d1 = orient2DCoords(t1x, t1y, t2x, t2y, s1x, s1y);
-  const d2 = orient2DCoords(t1x, t1y, t2x, t2y, s2x, s2y);
-  const d3 = orient2DCoords(s1x, s1y, s2x, s2y, t1x, t1y);
-  const d4 = orient2DCoords(s1x, s1y, s2x, s2y, t2x, t2y);
+  const d1 = orient2D(t1x, t1y, t2x, t2y, s1x, s1y);
+  const d2 = orient2D(t1x, t1y, t2x, t2y, s2x, s2y);
+  const d3 = orient2D(s1x, s1y, s2x, s2y, t1x, t1y);
+  const d4 = orient2D(s1x, s1y, s2x, s2y, t2x, t2y);
   return (
     (d1 > 0 && d2 < 0) ||
     (d1 < 0 && d2 > 0) ||
@@ -104,15 +78,6 @@ export const doCrossCoords = (
 };
 
 export const intersect = (
-  s1: Point,
-  s2: Point,
-  t1: Point,
-  t2: Point,
-): Point | null => {
-  return intersectCoords(s1.x, s1.y, s2.x, s2.y, t1.x, t1.y, t2.x, t2.y);
-};
-
-export const intersectCoords = (
   s1x: number,
   s1y: number,
   s2x: number,
@@ -122,7 +87,7 @@ export const intersectCoords = (
   t2x: number,
   t2y: number,
 ): Point | null => {
-  if (!doCrossCoords(s1x, s1y, s2x, s2y, t1x, t1y, t2x, t2y)) return null;
+  if (!doCross(s1x, s1y, s2x, s2y, t1x, t1y, t2x, t2y)) return null;
 
   const a1 = s2y - s1y;
   const b1 = s1x - s2x;
@@ -150,10 +115,10 @@ export const intersectCoords = (
   }
 
   if (
-    pointsEqualCoords(x, y, s1x, s1y) ||
-    pointsEqualCoords(x, y, s2x, s2y) ||
-    pointsEqualCoords(x, y, t1x, t1y) ||
-    pointsEqualCoords(x, y, t2x, t2y)
+    pointsEqual(x, y, s1x, s1y) ||
+    pointsEqual(x, y, s2x, s2y) ||
+    pointsEqual(x, y, t1x, t1y) ||
+    pointsEqual(x, y, t2x, t2y)
   ) {
     return null;
   }
@@ -161,11 +126,7 @@ export const intersectCoords = (
   return { x, y };
 };
 
-export const onSegment = (p: Point, s1: Point, s2: Point): boolean => {
-  return onSegmentCoords(p.x, p.y, s1.x, s1.y, s2.x, s2.y);
-};
-
-export const onSegmentCoords = (
+export const onSegment = (
   px: number,
   py: number,
   s1x: number,
@@ -173,7 +134,7 @@ export const onSegmentCoords = (
   s2x: number,
   s2y: number,
 ): boolean => {
-  if (Math.abs(orient2DCoords(s1x, s1y, s2x, s2y, px, py)) > EPS) {
+  if (Math.abs(orient2D(s1x, s1y, s2x, s2y, px, py)) > EPS) {
     return false;
   }
 
@@ -189,9 +150,54 @@ export const onSegmentCoords = (
   return true;
 };
 
-export const pointsEqualCoords = (
+export const pointsEqual = (
   ax: number,
   ay: number,
   bx: number,
   by: number,
 ): boolean => Math.abs(ax - bx) < EPS && Math.abs(ay - by) < EPS;
+
+// Compatibility wrappers for Point-based API
+export const orient2DPoint = (a: Point, b: Point, c: Point): number => {
+  return orient2D(a.x, a.y, b.x, b.y, c.x, c.y);
+};
+
+export const inTrianglePoint = (
+  p: Point,
+  e1: Point,
+  e2: Point,
+  e3: Point,
+): boolean => {
+  return inTriangle(p.x, p.y, e1.x, e1.y, e2.x, e2.y, e3.x, e3.y);
+};
+
+export const inCirclePoint = (
+  p: Point,
+  t1: Point,
+  t2: Point,
+  t3: Point,
+): number => {
+  return inCircle(p.x, p.y, t1.x, t1.y, t2.x, t2.y, t3.x, t3.y);
+};
+
+export const doCrossPoint = (
+  s1: Point,
+  s2: Point,
+  t1: Point,
+  t2: Point,
+): boolean => {
+  return doCross(s1.x, s1.y, s2.x, s2.y, t1.x, t1.y, t2.x, t2.y);
+};
+
+export const intersectPoint = (
+  s1: Point,
+  s2: Point,
+  t1: Point,
+  t2: Point,
+): Point | null => {
+  return intersect(s1.x, s1.y, s2.x, s2.y, t1.x, t1.y, t2.x, t2.y);
+};
+
+export const onSegmentPoint = (p: Point, s1: Point, s2: Point): boolean => {
+  return onSegment(p.x, p.y, s1.x, s1.y, s2.x, s2.y);
+};

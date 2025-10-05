@@ -28,14 +28,14 @@ describe("geometry basics", () => {
   test("locatePoint finds containing triangle", () => {
     const { edges, ab } = setupTriangle();
     const point = P(0.1, 0.1);
-    const containing = locatePoint(edges, point, ab);
+    const containing = locatePoint(edges, point.x, point.y, ab);
     expect(containing).toBe(ab);
   });
 
   test("locatePoint returns null when stepping outside boundary", () => {
     const { edges, ab } = setupTriangle();
     const point = P(2, 2);
-    expect(locatePoint(edges, point, ab)).toBeNull();
+    expect(locatePoint(edges, point.x, point.y, ab)).toBeNull();
   });
 
   test("flip updates connectivity", () => {
@@ -71,9 +71,9 @@ describe("geometry basics", () => {
     square(edges, 4, 4);
     const any = edges.any();
     const point = edges.origin(any);
-    const startEdge = locatePoint(edges, point, any);
+    const startEdge = locatePoint(edges, point.x, point.y, any);
     expect(startEdge).not.toBeNull();
-    const shared = findSharedEdge(edges, startEdge!, point, P(4, 4));
+    const shared = findSharedEdge(edges, startEdge!, point.x, point.y, 4, 4);
     expect(shared).not.toBe(-1);
   });
 
@@ -83,7 +83,7 @@ describe("geometry basics", () => {
     const initialCount = edges.count();
 
     const p = P(40, 40);
-    insertPoint(edges, p);
+    insertPoint(edges, 40, 40);
     const withPoint = Array.from(edges.iterator()).some((edge) => {
       const origin = edges.origin(edge);
       return Math.abs(origin.x - p.x) < 1e-6 && Math.abs(origin.y - p.y) < 1e-6;
@@ -91,11 +91,11 @@ describe("geometry basics", () => {
     expect(withPoint).toBe(true);
 
     const afterInsertCount = edges.count();
-    insertPoint(edges, p);
+    insertPoint(edges, 40, 40);
     expect(edges.count()).toBe(afterInsertCount);
 
     const onEdge = P(50, 0);
-    insertPoint(edges, onEdge);
+    insertPoint(edges, 50, 0);
     const onEdgeExists = Array.from(edges.iterator()).some((edge) => {
       const origin = edges.origin(edge);
       return (

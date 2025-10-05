@@ -184,24 +184,24 @@ export const pointRemoval = (edges: EdgeContext): void => {
     P(76, 326),
   ]);
 
-  removePoint(edges, P(113, 312));
+  removePoint(edges, 113, 312);
   // removePoint(edges, P(138, 221));
   // removePoint(edges, P(155, 256));
-  removePoint(edges, P(0, 333));
+  removePoint(edges, 0, 333);
 };
 
 export const selfIntersecting = (edges: EdgeContext): void => {
   edges.reset();
   square(edges, 100, 100);
 
-  insertPoint(edges, P(30, 40));
-  insertPoint(edges, P(10, 70));
-  insertPoint(edges, P(50, 50));
-  insertPoint(edges, P(20, 45));
+  insertPoint(edges, 30, 40);
+  insertPoint(edges, 10, 70);
+  insertPoint(edges, 50, 50);
+  insertPoint(edges, 20, 45);
 
-  enforceEdge(edges, P(30, 40), P(10, 70));
-  enforceEdge(edges, P(10, 70), P(50, 50));
-  enforceEdge(edges, P(50, 50), P(20, 45));
+  enforceEdge(edges, 30, 40, 10, 70);
+  enforceEdge(edges, 10, 70, 50, 50);
+  enforceEdge(edges, 50, 50, 20, 45);
 
   insertSquare(edges, 90, 0, 10);
   insertSquare(edges, 20, 50, 30);
@@ -220,15 +220,15 @@ export const grid = (edges: EdgeContext): void => {
       const x = i;
       const y = j;
 
-      insertPoint(edges, P(x, y));
-      insertPoint(edges, P(x + 1, y));
-      insertPoint(edges, P(x + 1, y + 1));
-      insertPoint(edges, P(x, y + 1));
+      insertPoint(edges, x, y);
+      insertPoint(edges, x + 1, y);
+      insertPoint(edges, x + 1, y + 1);
+      insertPoint(edges, x, y + 1);
 
-      enforceEdge(edges, P(x, y), P(x + 1, y));
-      enforceEdge(edges, P(x + 1, y), P(x + 1, y + 1));
-      enforceEdge(edges, P(x + 1, y + 1), P(x, y + 1));
-      enforceEdge(edges, P(x, y + 1), P(x, y));
+      enforceEdge(edges, x, y, x + 1, y);
+      enforceEdge(edges, x + 1, y, x + 1, y + 1);
+      enforceEdge(edges, x + 1, y + 1, x, y + 1);
+      enforceEdge(edges, x, y + 1, x, y);
     }
   }
 };
@@ -240,5 +240,5 @@ export const tinySquare = (edges: EdgeContext): void => {
   insertSquare(edges, 0, 0, 1);
   insertSquare(edges, 1, 0, 1);
 
-  removePoint(edges, P(0, 1));
+  removePoint(edges, 0, 1);
 };

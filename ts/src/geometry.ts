@@ -2,16 +2,11 @@ import { nullthrows as nt } from "./nullthrows";
 import { CAPACITY, EPS, QUEUE_LIMIT, STACK_LIMIT } from "./constants";
 import {
   orient2D,
-  orient2DCoords,
   inTriangle,
-  inTriangleCoords,
   doCross,
-  doCrossCoords,
   intersect,
-  intersectCoords,
   onSegment,
-  onSegmentCoords,
-  pointsEqualCoords,
+  pointsEqual,
 } from "./checks";
 import type { Point } from "./types";
 import { P } from "./types";
@@ -20,7 +15,7 @@ import { StaticStack } from "./staticStack";
 import { StaticQueue } from "./staticQueue";
 import { StaticRing } from "./staticRing";
 import { StaticDeque } from "./staticDeque";
-import { isConvexQuad, isDelaunay, getVertex, getVertexCoords } from "./edges";
+import { isConvexQuad, isDelaunay, getVertex } from "./edges";
 
 const assert = (condition: boolean, message: string): void => {
   if (!condition) {
@@ -44,12 +39,9 @@ const mustTwin = (ctx: EdgeContext, edge: number): number => {
   return twin;
 };
 
-const pointsEqual = (a: Point, b: Point): boolean =>
-  pointsEqualCoords(a.x, a.y, b.x, b.y);
-
 const clonePoint = (p: Point): Point => ({ x: p.x, y: p.y });
 
-export const locatePointCoords = (
+export const locatePoint = (
   ctx: EdgeContext,
   px: number,
   py: number,
@@ -75,21 +67,21 @@ export const locatePointCoords = (
     const cy = ctx.originYAt(cIdx);
 
     // Fast triangle containment test
-    if (inTriangleCoords(px, py, ax, ay, bx, by, cx, cy)) {
+    if (inTriangle(px, py, ax, ay, bx, by, cx, cy)) {
       return current;
     }
 
     let nextEdge = -1;
 
     // Check edge bIdx
-    const orientB = orient2DCoords(bx, by, cx, cy, px, py);
+    const orientB = orient2D(bx, by, cx, cy, px, py);
     if (orientB < 0) {
       const twin = ctx.getTwin(bIdx);
       if (twin === -1) return null;
       nextEdge = twin;
     } else {
       // Check edge cIdx
-      const orientC = orient2DCoords(cx, cy, ax, ay, px, py);
+      const orientC = orient2D(cx, cy, ax, ay, px, py);
       if (orientC < 0) {
         const twin = ctx.getTwin(cIdx);
         if (twin === -1) return null;
@@ -105,14 +97,6 @@ export const locatePointCoords = (
   }
 
   throw new Error("locatePoint exceeded iteration cap");
-};
-
-export const locatePoint = (
-  ctx: EdgeContext,
-  p: Point,
-  start: number,
-): number | null => {
-  return locatePointCoords(ctx, p.x, p.y, start);
 };
 
 export const square = (
@@ -185,7 +169,7 @@ export const flipEdges = (ctx: EdgeContext, stack: StaticStack): void => {
   }
 };
 
-export const findSharedEdgeCoords = (
+export const findSharedEdge = (
   ctx: EdgeContext,
   edge: number,
   e1x: number,
@@ -193,7 +177,7 @@ export const findSharedEdgeCoords = (
   e2x: number,
   e2y: number,
 ): number => {
-  const start = getVertexCoords(ctx, e1x, e1y, edge);
+  const start = getVertex(ctx, e1x, e1y, edge);
   assert(start !== -1, "findSharedEdge: e1 not a vertex");
   let current = start;
   const LIMIT = 100;
@@ -206,10 +190,7 @@ export const findSharedEdgeCoords = (
     const bIdx = mustNext(ctx, current);
     const bx = ctx.originXAt(bIdx);
     const by = ctx.originYAt(bIdx);
-    if (
-      pointsEqualCoords(ax, ay, e1x, e1y) &&
-      pointsEqualCoords(bx, by, e2x, e2y)
-    ) {
+    if (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) {
       return current;
     }
     const twin = ctx.getTwin(current);
@@ -226,10 +207,7 @@ export const findSharedEdgeCoords = (
     const bIdx = mustNext(ctx, current);
     const bx = ctx.originXAt(bIdx);
     const by = ctx.originYAt(bIdx);
-    if (
-      pointsEqualCoords(ax, ay, e1x, e1y) &&
-      pointsEqualCoords(bx, by, e2x, e2y)
-    ) {
+    if (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) {
       return current;
     }
     const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
@@ -238,15 +216,6 @@ export const findSharedEdgeCoords = (
     if (current === start) break;
   }
   return -1;
-};
-
-export const findSharedEdge = (
-  ctx: EdgeContext,
-  edge: number,
-  e1: Point,
-  e2: Point,
-): number => {
-  return findSharedEdgeCoords(ctx, edge, e1.x, e1.y, e2.x, e2.y);
 };
 
 const pushEdge = (stack: StaticStack, edge: number): void => {
@@ -262,7 +231,12 @@ const setTwinPair = (ctx: EdgeContext, a: number, b: number): void => {
   ctx.setTwin(b, a);
 };
 
-const insertPointInEdgeCoords = (ctx: EdgeContext, px: number, py: number, edge: number): void => {
+const insertPointInEdge = (
+  ctx: EdgeContext,
+  px: number,
+  py: number,
+  edge: number,
+): void => {
   const p = P(px, py);
   const ac = edge;
   const cd = mustNext(ctx, ac);
@@ -311,7 +285,12 @@ const insertPointInEdgeCoords = (ctx: EdgeContext, px: number, py: number, edge:
   flipEdges(ctx, insertStack);
 };
 
-const insertPointInFaceCoords = (ctx: EdgeContext, px: number, py: number, edge: number): void => {
+const insertPointInFace = (
+  ctx: EdgeContext,
+  px: number,
+  py: number,
+  edge: number,
+): void => {
   const p = P(px, py);
   const ab = edge;
   const bc = mustNext(ctx, ab);
@@ -351,9 +330,9 @@ const insertPointInFaceCoords = (ctx: EdgeContext, px: number, py: number, edge:
   flipEdges(ctx, insertStack);
 };
 
-export const insertPointCoords = (ctx: EdgeContext, px: number, py: number): void => {
+export const insertPoint = (ctx: EdgeContext, px: number, py: number): void => {
   const start = ctx.any();
-  const t = locatePointCoords(ctx, px, py, start);
+  const t = locatePoint(ctx, px, py, start);
   if (t === null) {
     throw new Error("Edge not found");
   }
@@ -370,28 +349,22 @@ export const insertPointCoords = (ctx: EdgeContext, px: number, py: number): voi
   const tNextNextY = ctx.originYAt(tNextNext);
 
   if (
-    pointsEqualCoords(tx, ty, px, py) ||
-    pointsEqualCoords(tNextX, tNextY, px, py) ||
-    pointsEqualCoords(tNextNextX, tNextNextY, px, py)
+    pointsEqual(tx, ty, px, py) ||
+    pointsEqual(tNextX, tNextY, px, py) ||
+    pointsEqual(tNextNextX, tNextNextY, px, py)
   ) {
     return;
   }
 
-  if (onSegmentCoords(px, py, tx, ty, tNextX, tNextY)) {
-    insertPointInEdgeCoords(ctx, px, py, t);
-  } else if (
-    onSegmentCoords(px, py, tNextX, tNextY, tNextNextX, tNextNextY)
-  ) {
-    insertPointInEdgeCoords(ctx, px, py, tNext);
-  } else if (onSegmentCoords(px, py, tNextNextX, tNextNextY, tx, ty)) {
-    insertPointInEdgeCoords(ctx, px, py, tNextNext);
+  if (onSegment(px, py, tx, ty, tNextX, tNextY)) {
+    insertPointInEdge(ctx, px, py, t);
+  } else if (onSegment(px, py, tNextX, tNextY, tNextNextX, tNextNextY)) {
+    insertPointInEdge(ctx, px, py, tNext);
+  } else if (onSegment(px, py, tNextNextX, tNextNextY, tx, ty)) {
+    insertPointInEdge(ctx, px, py, tNextNext);
   } else {
-    insertPointInFaceCoords(ctx, px, py, t);
+    insertPointInFace(ctx, px, py, t);
   }
-};
-
-export const insertPoint = (ctx: EdgeContext, p: Point): void => {
-  insertPointCoords(ctx, p.x, p.y);
 };
 
 export class GeometryQueue extends StaticQueue {
@@ -442,7 +415,7 @@ const hasIntersection = (
 ): boolean => {
   const a = ctx.origin(edge);
   const b = ctx.origin(mustNext(ctx, edge));
-  return intersect(a, b, e1, e2) !== null;
+  return intersect(a.x, a.y, b.x, b.y, e1.x, e1.y, e2.x, e2.y) !== null;
 };
 
 const setNextSafe = (ctx: EdgeContext, edge: number, next: number): void => {
@@ -457,14 +430,14 @@ export const getIntersecting = (
   e2: Point,
 ): void => {
   queue.reset();
-  const inTriangleEdge = locatePoint(ctx, e1, seed);
+  const inTriangleEdge = locatePoint(ctx, e1.x, e1.y, seed);
   if (inTriangleEdge === null) {
     throw new Error("E1NotInAnyTriangle");
   }
 
   const LIMIT = 20;
   const startEdge = (() => {
-    const start = getVertex(ctx, e1, inTriangleEdge);
+    const start = getVertex(ctx, e1.x, e1.y, inTriangleEdge);
     if (start === -1) {
       throw new Error("E1NotAVertex");
     }
@@ -523,7 +496,16 @@ export const getIntersecting = (
     for (const edge of [first, second]) {
       const a = ctx.origin(edge);
       const b = ctx.origin(mustNext(ctx, edge));
-      const intersection = intersect(a, b, e1, e2);
+      const intersection = intersect(
+        a.x,
+        a.y,
+        b.x,
+        b.y,
+        e1.x,
+        e1.y,
+        e2.x,
+        e2.y,
+      );
       if (intersection !== null) {
         const twin = ctx.getTwin(edge);
         assert(twin !== -1, "intersecting edge should have a twin");
@@ -534,7 +516,7 @@ export const getIntersecting = (
   }
 };
 
-const markCrossingCoords = (
+const markCrossing = (
   ctx: EdgeContext,
   edge: number,
   e1x: number,
@@ -555,7 +537,10 @@ const markCrossingCoords = (
       const bIdx = mustNext(ctx, candidate);
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
-      if (onSegmentCoords(ax, ay, e1x, e1y, e2x, e2y) && onSegmentCoords(bx, by, e1x, e1y, e2x, e2y)) {
+      if (
+        onSegment(ax, ay, e1x, e1y, e2x, e2y) &&
+        onSegment(bx, by, e1x, e1y, e2x, e2y)
+      ) {
         ctx.setFixed(candidate, true);
         const twin = ctx.getTwin(candidate);
         if (twin !== -1) {
@@ -581,7 +566,10 @@ const markCrossingCoords = (
       const bIdx = mustNext(ctx, candidate);
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
-      if (onSegmentCoords(ax, ay, e1x, e1y, e2x, e2y) && onSegmentCoords(bx, by, e1x, e1y, e2x, e2y)) {
+      if (
+        onSegment(ax, ay, e1x, e1y, e2x, e2y) &&
+        onSegment(bx, by, e1x, e1y, e2x, e2y)
+      ) {
         ctx.setFixed(candidate, true);
         const twin = ctx.getTwin(candidate);
         if (twin !== -1) {
@@ -597,26 +585,23 @@ const markCrossingCoords = (
   }
 };
 
-const markCrossing = (
+export const enforceEdge = (
   ctx: EdgeContext,
-  edge: number,
-  e1: Point,
-  e2: Point,
+  e1x: number,
+  e1y: number,
+  e2x: number,
+  e2y: number,
 ): void => {
-  markCrossingCoords(ctx, edge, e1.x, e1.y, e2.x, e2.y);
-};
-
-export const enforceEdgeCoords = (ctx: EdgeContext, e1x: number, e1y: number, e2x: number, e2y: number): void => {
   intersectQueue.reset();
   const anyEdge = ctx.any();
-  const p = locatePointCoords(ctx, e1x, e1y, anyEdge);
+  const p = locatePoint(ctx, e1x, e1y, anyEdge);
   if (p === null) {
     throw new Error("EdgeNotFound");
   }
 
-  const vertex = getVertexCoords(ctx, e1x, e1y, p);
+  const vertex = getVertex(ctx, e1x, e1y, p);
   if (vertex !== -1) {
-    const shared = findSharedEdgeCoords(ctx, p, e1x, e1y, e2x, e2y);
+    const shared = findSharedEdge(ctx, p, e1x, e1y, e2x, e2y);
     if (shared !== -1) {
       ctx.setFixed(shared, true);
       const twinShared = ctx.getTwin(shared);
@@ -642,11 +627,11 @@ export const enforceEdgeCoords = (ctx: EdgeContext, e1x: number, e1y: number, e2
       const bIdx = mustNext(ctx, edge);
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
-      const intersection = intersectCoords(e1x, e1y, e2x, e2y, ax, ay, bx, by);
+      const intersection = intersect(e1x, e1y, e2x, e2y, ax, ay, bx, by);
       assert(intersection !== null, "Expected intersection to exist");
-      insertPointInEdgeCoords(ctx, intersection!.x, intersection!.y, edge);
+      insertPointInEdge(ctx, intersection!.x, intersection!.y, edge);
       const next = mustNext(ctx, edge);
-      markCrossingCoords(ctx, next, e1x, e1y, e2x, e2y);
+      markCrossing(ctx, next, e1x, e1y, e2x, e2y);
       continue;
     }
 
@@ -662,7 +647,10 @@ export const enforceEdgeCoords = (ctx: EdgeContext, e1x: number, e1y: number, e2
     const destIdx = mustNext(ctx, edge);
     const destX = ctx.originXAt(destIdx);
     const destY = ctx.originYAt(destIdx);
-    if (onSegmentCoords(originX, originY, e1x, e1y, e2x, e2y) && onSegmentCoords(destX, destY, e1x, e1y, e2x, e2y)) {
+    if (
+      onSegment(originX, originY, e1x, e1y, e2x, e2y) &&
+      onSegment(destX, destY, e1x, e1y, e2x, e2y)
+    ) {
       ctx.setFixed(edge, true);
       const twin = ctx.getTwin(edge);
       if (twin !== -1) {
@@ -670,14 +658,10 @@ export const enforceEdgeCoords = (ctx: EdgeContext, e1x: number, e1y: number, e2
       }
     }
 
-    if (doCrossCoords(e1x, e1y, e2x, e2y, originX, originY, destX, destY)) {
+    if (doCross(e1x, e1y, e2x, e2y, originX, originY, destX, destY)) {
       intersectQueue.push(edge);
     }
   }
-};
-
-export const enforceEdge = (ctx: EdgeContext, e1: Point, e2: Point): void => {
-  enforceEdgeCoords(ctx, e1.x, e1.y, e2.x, e2.y);
 };
 
 const isBoundaryEdge = (ctx: EdgeContext, edge: number): boolean =>
@@ -707,16 +691,17 @@ const destroyEdgeIfInternal = (
 export const collectBoundary = (
   ctx: EdgeContext,
   boundary: GeometryRing,
-  p: Point,
+  px: number,
+  py: number,
 ): void => {
   boundary.reset();
   const anyEdge = ctx.any();
-  const startTriangle = locatePoint(ctx, p, anyEdge);
+  const startTriangle = locatePoint(ctx, px, py, anyEdge);
   if (startTriangle === null) {
     throw new Error("EdgeNotFound");
   }
 
-  const startVertex = getVertex(ctx, p, startTriangle);
+  const startVertex = getVertex(ctx, px, py, startTriangle);
   if (startVertex === -1) {
     throw new Error("NotVertex");
   }
@@ -795,7 +780,14 @@ export const removeCollinear = (
       isBoundaryEdge(ctx, aEdge) && isBoundaryEdge(ctx, bEdge);
     const collinear =
       Math.abs(
-        orient2D(ctx.origin(aEdge), ctx.origin(bEdge), ctx.origin(cEdge)),
+        orient2D(
+          ctx.originXAt(aEdge),
+          ctx.originYAt(aEdge),
+          ctx.originXAt(bEdge),
+          ctx.originYAt(bEdge),
+          ctx.originXAt(cEdge),
+          ctx.originYAt(cEdge),
+        ),
       ) <= EPS;
 
     if (isOnBoundary && collinear) {
@@ -837,14 +829,30 @@ export const fillCavity = (ctx: EdgeContext, boundary: GeometryRing): void => {
     const cPoint = ctx.origin(cEdge);
 
     const isEar = (() => {
-      if (orient2D(aPoint, bPoint, cPoint) <= 0) return false;
+      if (
+        orient2D(aPoint.x, aPoint.y, bPoint.x, bPoint.y, cPoint.x, cPoint.y) <=
+        0
+      )
+        return false;
 
       let other = boundary.first;
       if (other === -1) return true;
       do {
         if (other !== aNode && other !== bNode && other !== cNode) {
           const p = ctx.origin(boundary.valueOf(other));
-          if (inTriangle(p, aPoint, bPoint, cPoint)) return false;
+          if (
+            inTriangle(
+              p.x,
+              p.y,
+              aPoint.x,
+              aPoint.y,
+              bPoint.x,
+              bPoint.y,
+              cPoint.x,
+              cPoint.y,
+            )
+          )
+            return false;
         }
         other = boundary.nextOf(other);
       } while (other !== boundary.first);
@@ -887,9 +895,9 @@ export const fillCavity = (ctx: EdgeContext, boundary: GeometryRing): void => {
   flipEdges(ctx, flipStack);
 };
 
-export const removePoint = (ctx: EdgeContext, p: Point): void => {
+export const removePoint = (ctx: EdgeContext, px: number, py: number): void => {
   boundaryRing.reset();
-  collectBoundary(ctx, boundaryRing, p);
+  collectBoundary(ctx, boundaryRing, px, py);
   removeCollinear(ctx, boundaryRing);
   fillCavity(ctx, boundaryRing);
 };
@@ -910,4 +918,41 @@ export const validate = (ctx: EdgeContext): void => {
       throw new Error("Fixed edge mismatch");
     }
   }
+};
+
+// Compatibility wrappers for Point-based API
+export const locatePointPoint = (
+  ctx: EdgeContext,
+  p: Point,
+  start: number,
+): number | null => {
+  return locatePoint(ctx, p.x, p.y, start);
+};
+
+export const insertPointPoint = (ctx: EdgeContext, p: Point): void => {
+  insertPoint(ctx, p.x, p.y);
+};
+
+export const findSharedEdgePoint = (
+  ctx: EdgeContext,
+  edge: number,
+  e1: Point,
+  e2: Point,
+): number => {
+  return findSharedEdge(ctx, edge, e1.x, e1.y, e2.x, e2.y);
+};
+
+export const enforceEdgePoint = (
+  ctx: EdgeContext,
+  e1: Point,
+  e2: Point,
+): void => {
+  enforceEdge(ctx, e1.x, e1.y, e2.x, e2.y);
+};
+
+export const removePointPoint = (ctx: EdgeContext, p: Point): void => {
+  boundaryRing.reset();
+  collectBoundary(ctx, boundaryRing, p.x, p.y);
+  removeCollinear(ctx, boundaryRing);
+  fillCavity(ctx, boundaryRing);
 };

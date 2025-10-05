@@ -12,9 +12,9 @@ import {
   GeometryQueue,
   GeometryRing,
 } from "../src/geometry";
-import { insertPoint } from "../src/geometry.js";
+import { insertPoint } from "../src/geometry";
 import { insertSquare } from "../src/utils";
-import { getVertex } from "../src/edges";
+import { getVertexPoint } from "../src/edges";
 
 const pointEquals = (
   a: { x: number; y: number },
@@ -24,7 +24,7 @@ const pointEquals = (
 };
 
 const getVertexIndex = (ctx: EdgeContext, p: Point, edge: number): number => {
-  return getVertex(ctx, p, edge);
+  return getVertexPoint(ctx, p, edge);
 };
 
 describe("geometry advanced functions", () => {
@@ -32,11 +32,11 @@ describe("geometry advanced functions", () => {
     const edges = new EdgeContext(512);
 
     square(edges, 100, 100);
-    insertPoint(edges, P(40, 40));
-    insertPoint(edges, P(60, 80));
+    insertPoint(edges, 40, 40);
+    insertPoint(edges, 60, 80);
 
     const queue = new GeometryQueue();
-    const seed = locatePoint(edges, P(100, 100), edges.any());
+    const seed = locatePoint(edges, 100, 100, edges.any());
     expect(seed).not.toBeNull();
     getIntersecting(edges, queue, seed!, P(100, 100), P(0, 0));
 
@@ -48,17 +48,17 @@ describe("geometry advanced functions", () => {
 
     edges.reset();
     square(edges, 100, 100);
-    insertPoint(edges, P(30, 40));
-    insertPoint(edges, P(10, 70));
-    insertPoint(edges, P(50, 50));
-    insertPoint(edges, P(20, 45));
-    enforceEdge(edges, P(30, 40), P(10, 70));
-    enforceEdge(edges, P(10, 70), P(50, 50));
+    insertPoint(edges, 30, 40);
+    insertPoint(edges, 10, 70);
+    insertPoint(edges, 50, 50);
+    insertPoint(edges, 20, 45);
+    enforceEdge(edges, 30, 40, 10, 70);
+    enforceEdge(edges, 10, 70, 50, 50);
 
     const queue2 = new GeometryQueue();
     const e1 = P(50, 50);
     const e2 = P(20, 45);
-    const tri = locatePoint(edges, e1, edges.any());
+    const tri = locatePoint(edges, e1.x, e1.y, edges.any());
     expect(tri).not.toBeNull();
     const start = getVertexIndex(edges, e1, tri!);
     expect(start).not.toBe(-1);
@@ -80,7 +80,7 @@ describe("geometry advanced functions", () => {
     insertSquare(edges, 1, 0, 1);
 
     const ring = new GeometryRing();
-    collectBoundary(edges, ring, P(2, 1));
+    collectBoundary(edges, ring, 2, 1);
 
     expect(edges.count()).toBe(15);
 
@@ -120,10 +120,10 @@ describe("geometry advanced functions", () => {
     insertSquare(edges, 1, 0, 1);
 
     const initial = edges.count();
-    removePoint(edges, P(2, 1));
+    removePoint(edges, 2, 1);
     expect(edges.count()).toBeLessThan(initial);
 
-    expect(() => removePoint(edges, P(3, 3))).toThrow();
-    expect(() => removePoint(edges, P(-1, -1))).toThrow();
+    expect(() => removePoint(edges, 3, 3)).toThrow();
+    expect(() => removePoint(edges, -1, -1)).toThrow();
   });
 });

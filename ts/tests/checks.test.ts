@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { P } from "../src/types";
 import {
-  orient2D,
-  inTriangle,
-  inCircle,
-  doCross,
-  intersect,
-  onSegment,
+  orient2DPoint as orient2D,
+  inTrianglePoint as inTriangle,
+  inCirclePoint as inCircle,
+  doCrossPoint as doCross,
+  intersectPoint as intersect,
+  onSegmentPoint as onSegment,
 } from "../src/checks";
 
 describe("checks", () => {

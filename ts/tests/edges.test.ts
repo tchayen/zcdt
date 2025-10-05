@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { EdgeContext } from "../src/edgeContext";
 import { P } from "../src/types";
-import { isConvexQuad, isDelaunay, getVertex, isEdgeEqual } from "../src/edges";
+import {
+  isConvexQuad,
+  isDelaunay,
+  getVertexPoint,
+  isEdgeEqualPoint,
+} from "../src/edges";
 
 describe("edges helpers", () => {
   test("isConvexQuad", () => {
@@ -72,10 +77,10 @@ describe("edges helpers", () => {
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    expect(getVertex(edges, a, ab)).toBe(ab);
-    expect(getVertex(edges, b, ab)).toBe(bc);
-    expect(getVertex(edges, c, ab)).toBe(ca);
-    expect(getVertex(edges, P(2, 2), ab)).toBe(-1);
+    expect(getVertexPoint(edges, a, ab)).toBe(ab);
+    expect(getVertexPoint(edges, b, ab)).toBe(bc);
+    expect(getVertexPoint(edges, c, ab)).toBe(ca);
+    expect(getVertexPoint(edges, P(2, 2), ab)).toBe(-1);
   });
 
   test("isEdgeEqual", () => {
@@ -91,8 +96,8 @@ describe("edges helpers", () => {
     edges.setNext(bc, ca);
     edges.setNext(ca, ab);
 
-    expect(isEdgeEqual(edges, ab, a, b)).toBe(true);
-    expect(isEdgeEqual(edges, ab, b, a)).toBe(true);
-    expect(isEdgeEqual(edges, ab, a, c)).toBe(false);
+    expect(isEdgeEqualPoint(edges, ab, a, b)).toBe(true);
+    expect(isEdgeEqualPoint(edges, ab, b, a)).toBe(true);
+    expect(isEdgeEqualPoint(edges, ab, a, c)).toBe(false);
   });
 });
