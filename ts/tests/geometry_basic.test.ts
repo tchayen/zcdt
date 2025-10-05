@@ -80,11 +80,10 @@ describe("geometry basics", () => {
   test("insertPoint creates vertex and is idempotent", () => {
     const edges = new EdgeContext(256);
     square(edges, 100, 100);
-    const initialCount = edges.count();
 
     const p = P(40, 40);
     insertPoint(edges, 40, 40);
-    const withPoint = Array.from(edges.iterator()).some((edge) => {
+    const withPoint = [...edges.iterator()].some((edge) => {
       const origin = edges.origin(edge);
       return Math.abs(origin.x - p.x) < 1e-6 && Math.abs(origin.y - p.y) < 1e-6;
     });
@@ -96,7 +95,7 @@ describe("geometry basics", () => {
 
     const onEdge = P(50, 0);
     insertPoint(edges, 50, 0);
-    const onEdgeExists = Array.from(edges.iterator()).some((edge) => {
+    const onEdgeExists = [...edges.iterator()].some((edge) => {
       const origin = edges.origin(edge);
       return (
         Math.abs(origin.x - onEdge.x) < 1e-6 &&

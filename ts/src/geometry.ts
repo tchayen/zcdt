@@ -46,7 +46,7 @@ export function locatePoint(
 ): number | null {
   let current = start;
   let i = 0;
-  while (i < 10000) {
+  while (i < 10_000) {
     i += 1;
 
     const ax = ctx.originX[current]!;

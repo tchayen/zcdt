@@ -10,13 +10,13 @@ import {
 
 describe("presets", () => {
   test("playground preset runs without errors", () => {
-    const edges = new EdgeContext(10000);
+    const edges = new EdgeContext(10_000);
     expect(() => playground(edges)).not.toThrow();
     expect(edges.count()).toBeGreaterThan(0);
   });
 
   test("pointRemoval preset runs without errors", () => {
-    const edges = new EdgeContext(10000);
+    const edges = new EdgeContext(10_000);
     expect(() => pointRemoval(edges)).not.toThrow();
     expect(edges.count()).toBeGreaterThan(0);
   });
@@ -28,7 +28,7 @@ describe("presets", () => {
   });
 
   test("grid preset runs without errors", () => {
-    const edges = new EdgeContext(16000); // Use almost max capacity for 50x50 grid
+    const edges = new EdgeContext(16_000); // Use almost max capacity for 50x50 grid
     expect(() => grid(edges)).not.toThrow();
     expect(edges.count()).toBeGreaterThan(0);
   });
@@ -40,7 +40,7 @@ describe("presets", () => {
   });
 
   test("playground preset creates expected number of elements", () => {
-    const edges = new EdgeContext(10000);
+    const edges = new EdgeContext(10_000);
     playground(edges);
 
     // The playground should create a significant number of edges
@@ -49,7 +49,7 @@ describe("presets", () => {
   });
 
   test("grid preset creates many edges", () => {
-    const edges = new EdgeContext(16000); // Use almost max capacity for 50x50 grid
+    const edges = new EdgeContext(16_000); // Use almost max capacity for 50x50 grid
     grid(edges);
 
     // Grid creates 50x50 = 2500 squares, each with 4 edges

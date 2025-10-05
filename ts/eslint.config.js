@@ -41,7 +41,6 @@ export default [
       "unicorn/no-null": "off", // We use null for edge cases
       "unicorn/filename-case": "off", // Keep existing naming convention
       "unicorn/prevent-abbreviations": "off", // Too strict for geometric code
-      "unicorn/numeric-separators-style": "off", // Allow existing number formatting
       "unicorn/prefer-single-call": "off", // Multiple pushes are fine
       "unicorn/no-this-assignment": "off", // Allow `const ctx = this`
       "@typescript-eslint/no-this-alias": "off", // Allow `const ctx = this`
@@ -57,7 +56,6 @@ export default [
       "unicorn/prefer-string-trim-start-end": "error",
       "unicorn/prefer-type-error": "error",
       "unicorn/throw-new-error": "error",
-      "unicorn/prefer-spread": "error",
 
       // General rules
       "no-console": "warn",

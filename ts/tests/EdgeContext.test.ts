@@ -13,7 +13,7 @@ describe("EdgeContext", () => {
     edges.destroy(e1);
     expect(edges.count()).toBe(1);
 
-    const iterated = Array.from(edges.iterator());
+    const iterated = [...edges.iterator()];
     expect(iterated).toContain(e2);
   });
 
