@@ -22,22 +22,6 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
-function mustNext(ctx: EdgeContext, edge: number): number {
-  const next = ctx.next[edge]!;
-  if (next === -1) {
-    throw new Error("Half-edge has no `next` reference");
-  }
-  return next;
-}
-
-function mustTwin(ctx: EdgeContext, edge: number): number {
-  const twin = ctx.twin[edge]!;
-  if (twin === -1) {
-    throw new Error("Half-edge has no twin");
-  }
-  return twin;
-}
-
 export function locatePoint(
   ctx: EdgeContext,
   px: number,
@@ -127,16 +111,16 @@ export function square(ctx: EdgeContext, width: number, height: number): void {
 }
 
 export function flip(ctx: EdgeContext, edge: number): void {
-  const twin = mustTwin(ctx, edge);
+  const twin = nt(ctx.twin[edge], "Half-edge has no twin");
   assert(!ctx.isFixed(edge) && !ctx.isFixed(twin), "cannot flip fixed edge");
   assert(isConvexQuad(ctx, edge), "flip requires convex quad");
 
   const ac = edge;
   const ca = twin;
-  const ab = mustNext(ctx, ca);
-  const bc = mustNext(ctx, ab);
-  const cd = mustNext(ctx, ac);
-  const da = mustNext(ctx, cd);
+  const ab = nt(ctx.next[ca], "Half-edge has no `next` reference");
+  const bc = nt(ctx.next[ab], "Half-edge has no `next` reference");
+  const cd = nt(ctx.next[ac], "Half-edge has no `next` reference");
+  const da = nt(ctx.next[cd], "Half-edge has no `next` reference");
 
   ctx.setOrigin(ac, ctx.origin(da));
   ctx.setOrigin(ca, ctx.origin(bc));
@@ -168,8 +152,8 @@ export function flipEdges(ctx: EdgeContext, stack: StaticStack): void {
       continue;
     }
 
-    const fNext = mustNext(ctx, twin);
-    const fNextNext = mustNext(ctx, fNext);
+    const fNext = nt(ctx.next[twin], "Half-edge has no `next` reference");
+    const fNextNext = nt(ctx.next[fNext], "Half-edge has no `next` reference");
     stack.push(fNext);
     stack.push(fNextNext);
     flip(ctx, edge);
@@ -194,7 +178,7 @@ export function findSharedEdge(
     i += 1;
     const ax = ctx.originXAt(current);
     const ay = ctx.originYAt(current);
-    const bIdx = mustNext(ctx, current);
+    const bIdx = nt(ctx.next[current], "Half-edge has no `next` reference");
     const bx = ctx.originXAt(bIdx);
     const by = ctx.originYAt(bIdx);
     if (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) {
@@ -204,7 +188,7 @@ export function findSharedEdge(
     if (twin === -1) {
       break;
     }
-    current = mustNext(ctx, twin);
+    current = nt(ctx.next[twin], "Half-edge has no `next` reference");
     if (current === start) {
       break;
     }
@@ -215,13 +199,18 @@ export function findSharedEdge(
     i += 1;
     const ax = ctx.originXAt(current);
     const ay = ctx.originYAt(current);
-    const bIdx = mustNext(ctx, current);
+    const bIdx = nt(ctx.next[current], "Half-edge has no `next` reference");
     const bx = ctx.originXAt(bIdx);
     const by = ctx.originYAt(bIdx);
     if (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) {
       return current;
     }
-    const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
+    const next = ctx.getTwin(
+      nt(
+        ctx.next[nt(ctx.next[current], "Half-edge has no `next` reference")],
+        "Half-edge has no `next` reference",
+      ),
+    );
     if (next === -1) {
       break;
     }
@@ -241,8 +230,8 @@ function insertPointInEdge(
 ): void {
   const p = P(px, py);
   const ac = edge;
-  const cd = mustNext(ctx, ac);
-  const da = mustNext(ctx, cd);
+  const cd = nt(ctx.next[ac], "Half-edge has no `next` reference");
+  const da = nt(ctx.next[cd], "Half-edge has no `next` reference");
 
   const pd = ctx.create({ x: p.x, y: p.y });
   const dp = ctx.create({ x: ctx.origin(da).x, y: ctx.origin(da).y });
@@ -264,7 +253,7 @@ function insertPointInEdge(
   const pa = ctx.getTwin(ac);
   if (pa !== -1) {
     ctx.setOrigin(pa, p);
-    const ab = mustNext(ctx, pa);
+    const ab = nt(ctx.next[pa], "Half-edge has no `next` reference");
 
     const cp = ctx.create({
       x: ctx.origin(cd).x,
@@ -274,7 +263,7 @@ function insertPointInEdge(
     ctx.setTwin(pc, cp);
     ctx.setTwin(cp, pc);
 
-    const bc = mustNext(ctx, ab);
+    const bc = nt(ctx.next[ab], "Half-edge has no `next` reference");
     const pb = ctx.create({ x: p.x, y: p.y });
     const bp = ctx.create({ x: ctx.origin(bc).x, y: ctx.origin(bc).y });
     ctx.setTwin(pb, bp);
@@ -302,8 +291,8 @@ function insertPointInFace(
 ): void {
   const p = P(px, py);
   const ab = edge;
-  const bc = mustNext(ctx, ab);
-  const ca = mustNext(ctx, bc);
+  const bc = nt(ctx.next[ab], "Half-edge has no `next` reference");
+  const ca = nt(ctx.next[bc], "Half-edge has no `next` reference");
 
   const a = ctx.origin(ab);
   const b = ctx.origin(bc);
@@ -346,9 +335,12 @@ export function insertPoint(ctx: EdgeContext, px: number, py: number): void {
   const start = ctx.any();
   const t = nt(locatePoint(ctx, px, py, start), "Edge not found");
 
-  const tNext = mustNext(ctx, t);
-  const tNextNext = mustNext(ctx, tNext);
-  assert(mustNext(ctx, tNextNext) === t, "triangle connectivity broken");
+  const tNext = nt(ctx.next[t], "Half-edge has no `next` reference");
+  const tNextNext = nt(ctx.next[tNext], "Half-edge has no `next` reference");
+  assert(
+    nt(ctx.next[tNextNext], "Half-edge has no `next` reference") === t,
+    "triangle connectivity broken",
+  );
 
   const tx = ctx.originXAt(t);
   const ty = ctx.originYAt(t);
@@ -405,8 +397,8 @@ function edgeLoopEdges(
   ctx: EdgeContext,
   edge: number,
 ): [number, number, number] {
-  const b = mustNext(ctx, edge);
-  const c = mustNext(ctx, b);
+  const b = nt(ctx.next[edge], "Half-edge has no `next` reference");
+  const c = nt(ctx.next[b], "Half-edge has no `next` reference");
   return [edge, b, c];
 }
 
@@ -417,7 +409,7 @@ function hasIntersection(
   e2: Point,
 ): boolean {
   const a = ctx.origin(edge);
-  const b = ctx.origin(mustNext(ctx, edge));
+  const b = ctx.origin(nt(ctx.next[edge], "Half-edge has no `next` reference"));
   return intersect(a.x, a.y, b.x, b.y, e1.x, e1.y, e2.x, e2.y) !== null;
 }
 
@@ -449,7 +441,7 @@ function findStartEdgeForIntersect(
     if (twin === -1) {
       break;
     }
-    current = mustNext(ctx, twin);
+    current = nt(ctx.next[twin], "Half-edge has no `next` reference");
     if (current === start) {
       break;
     }
@@ -467,7 +459,12 @@ function findStartEdgeForIntersect(
       return current;
     }
 
-    const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
+    const next = ctx.getTwin(
+      nt(
+        ctx.next[nt(ctx.next[current], "Half-edge has no `next` reference")],
+        "Half-edge has no `next` reference",
+      ),
+    );
     if (next === -1) {
       break;
     }
@@ -507,12 +504,14 @@ export function getIntersecting(
   let iterations = 0;
   while (iterations < LIMIT) {
     iterations += 1;
-    const first = mustNext(ctx, current);
-    const second = mustNext(ctx, first);
+    const first = nt(ctx.next[current], "Half-edge has no `next` reference");
+    const second = nt(ctx.next[first], "Half-edge has no `next` reference");
 
     for (const edge of [first, second]) {
       const a = ctx.origin(edge);
-      const b = ctx.origin(mustNext(ctx, edge));
+      const b = ctx.origin(
+        nt(ctx.next[edge], "Half-edge has no `next` reference"),
+      );
       const intersection = intersect(
         a.x,
         a.y,
@@ -551,7 +550,7 @@ function markCrossing(
     for (const candidate of [e0, e1Idx, e2Idx]) {
       const ax = ctx.originXAt(candidate);
       const ay = ctx.originYAt(candidate);
-      const bIdx = mustNext(ctx, candidate);
+      const bIdx = nt(ctx.next[candidate], "Half-edge has no `next` reference");
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
       if (
@@ -570,7 +569,7 @@ function markCrossing(
     if (twin === -1) {
       break;
     }
-    current = mustNext(ctx, twin);
+    current = nt(ctx.next[twin], "Half-edge has no `next` reference");
     if (current === edge) {
       break;
     }
@@ -584,7 +583,7 @@ function markCrossing(
     for (const candidate of [e0, e1Idx, e2Idx]) {
       const ax = ctx.originXAt(candidate);
       const ay = ctx.originYAt(candidate);
-      const bIdx = mustNext(ctx, candidate);
+      const bIdx = nt(ctx.next[candidate], "Half-edge has no `next` reference");
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
       if (
@@ -599,7 +598,12 @@ function markCrossing(
       }
     }
 
-    const next = ctx.getTwin(mustNext(ctx, mustNext(ctx, current)));
+    const next = ctx.getTwin(
+      nt(
+        ctx.next[nt(ctx.next[current], "Half-edge has no `next` reference")],
+        "Half-edge has no `next` reference",
+      ),
+    );
     if (next === -1) {
       break;
     }
@@ -651,13 +655,13 @@ export function enforceEdge(
     if (ctx.isFixed(edge)) {
       const ax = ctx.originXAt(edge);
       const ay = ctx.originYAt(edge);
-      const bIdx = mustNext(ctx, edge);
+      const bIdx = nt(ctx.next[edge], "Half-edge has no `next` reference");
       const bx = ctx.originXAt(bIdx);
       const by = ctx.originYAt(bIdx);
       const intersection = intersect(e1x, e1y, e2x, e2y, ax, ay, bx, by);
       assert(intersection !== null, "Expected intersection to exist");
       insertPointInEdge(ctx, intersection!.x, intersection!.y, edge);
-      const next = mustNext(ctx, edge);
+      const next = nt(ctx.next[edge], "Half-edge has no `next` reference");
       markCrossing(ctx, next, e1x, e1y, e2x, e2y);
       continue;
     }
@@ -671,7 +675,7 @@ export function enforceEdge(
 
     const originX = ctx.originXAt(edge);
     const originY = ctx.originYAt(edge);
-    const destIdx = mustNext(ctx, edge);
+    const destIdx = nt(ctx.next[edge], "Half-edge has no `next` reference");
     const destX = ctx.originXAt(destIdx);
     const destY = ctx.originYAt(destIdx);
     if (
@@ -745,15 +749,17 @@ export function collectBoundary(
   destroyStack.reset();
 
   while (i < LIMIT) {
-    const next = mustNext(ctx, current);
+    const next = nt(ctx.next[current], "Half-edge has no `next` reference");
     boundary.append(next);
 
     destroyStack.push(current);
-    destroyStack.push(mustNext(ctx, next));
+    destroyStack.push(nt(ctx.next[next], "Half-edge has no `next` reference"));
 
-    const twin = ctx.getTwin(mustNext(ctx, next));
+    const twin = ctx.getTwin(
+      nt(ctx.next[next], "Half-edge has no `next` reference"),
+    );
     if (twin === -1) {
-      boundary.append(mustNext(ctx, next));
+      boundary.append(nt(ctx.next[next], "Half-edge has no `next` reference"));
       continueCW = true;
       break;
     }
@@ -774,15 +780,24 @@ export function collectBoundary(
     while (current !== -1) {
       i += 1;
       assert(i < LIMIT, "collectBoundary exceeded iteration cap (cw)");
-      const next = mustNext(ctx, mustNext(ctx, current));
+      const next = nt(
+        ctx.next[nt(ctx.next[current], "Half-edge has no `next` reference")],
+        "Half-edge has no `next` reference",
+      );
       boundary.prepend(next);
 
       destroyStack.push(current);
-      destroyStack.push(mustNext(ctx, current));
+      destroyStack.push(
+        nt(ctx.next[current], "Half-edge has no `next` reference"),
+      );
 
-      const nextTwin = ctx.getTwin(mustNext(ctx, current));
+      const nextTwin = ctx.getTwin(
+        nt(ctx.next[current], "Half-edge has no `next` reference"),
+      );
       if (nextTwin === -1) {
-        boundary.prepend(mustNext(ctx, current));
+        boundary.prepend(
+          nt(ctx.next[current], "Half-edge has no `next` reference"),
+        );
         break;
       }
       current = nextTwin;
