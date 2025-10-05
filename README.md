@@ -7,6 +7,12 @@ A library for dynamic CDT (constrained Delaunay triangulation) in Zig. Maintains
 
 Based mostly on own research of computational geometry. I wrote a blog post about the process and origin of this library: [Handmade pathfinding mesh for games](https://tchayen.com/handmade-pathfinding-mesh-for-games). Final implementation similar to proposed by [Kallmann et al (2003)](https://infoscience.epfl.ch/server/api/core/bitstreams/7d6df859-c6df-42bd-935f-84f75380054b/content).
 
+## Installation
+
+```bash
+zig fetch --save git+https://github.com/tchayen/zcdt
+```
+
 ## Basics
 
 The main type is **half-edge**. Why half? I store info about edge on the side of the half-edge. I could as well keep both sides and both origins. But that creates a problem with next. Half-edge naturally allows me to describe all triangles through chains of half-edges.
@@ -61,3 +67,20 @@ _Errors: `error.EdgeNotFound`, `error.E1NotInAnyTriangle`, `error.E1NotAVertex`,
 Removes point previously inserted with `insertPoint()` from the triangulation.
 
 _Errors: `error.EdgeNotFound`, `error.NotVertex`, `error.OutOfMemory`._
+
+## Types
+
+```zig
+pub const HalfEdge = struct {
+    origin: Point,
+    twin: ?*HalfEdge = null,
+    next: ?*HalfEdge = null,
+    fixed: bool = false,
+}
+```
+
+## TODO:
+
+- [ ] What is now `root.zig` should be main (and only?) Zig file in one of the examples. Example should be its own app using the library.
+- [ ] Run Zig tests on CI.
+- [ ] When releasing versions, publish git tag and link to that tag when sharing link.
