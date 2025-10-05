@@ -80,23 +80,3 @@ export function getVertex(
   }
   return -1;
 }
-
-export function isEdgeEqual(
-  ctx: EdgeContext,
-  edge: number,
-  e1x: number,
-  e1y: number,
-  e2x: number,
-  e2y: number,
-): boolean {
-  const aIdx = edge;
-  const bIdx = ctx.next[edge]!;
-  const ax = ctx.originX[aIdx]!;
-  const ay = ctx.originY[aIdx]!;
-  const bx = ctx.originX[bIdx]!;
-  const by = ctx.originY[bIdx]!;
-  return (
-    (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) ||
-    (pointsEqual(ax, ay, e2x, e2y) && pointsEqual(bx, by, e1x, e1y))
-  );
-}

@@ -135,7 +135,9 @@ function stopDragging() {
 }
 
 function drag(e: MouseEvent) {
-  if (!isDragging) return;
+  if (!isDragging) {
+    return;
+  }
 
   const deltaX = (e.clientX - lastX) * dpr;
   const deltaY = (e.clientY - lastY) * dpr;

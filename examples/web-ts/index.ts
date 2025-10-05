@@ -28,7 +28,9 @@ const edges = new EdgeContext(16000);
 // Load initial preset
 function loadPreset(index: number): void {
   const preset = presets[index];
-  if (!preset) return;
+  if (!preset) {
+    return;
+  }
 
   console.log(`Loading preset: ${preset.name}`);
 
@@ -67,7 +69,9 @@ function exportEdges(): HalfEdge[] {
   const capacity = edges.getCapacity();
 
   for (let i = 0; i < capacity; i++) {
-    if (!edges.isInUse(i)) continue;
+    if (!edges.isInUse(i)) {
+      continue;
+    }
 
     const origin = edges.origin(i);
     const next = edges.getNext(i);
@@ -270,7 +274,9 @@ function stopDragging() {
 }
 
 function drag(e: MouseEvent) {
-  if (!isDragging) return;
+  if (!isDragging) {
+    return;
+  }
 
   const deltaX = (e.clientX - lastX) * dpr;
   const deltaY = (e.clientY - lastY) * dpr;
@@ -349,10 +355,14 @@ function draw() {
   }
 
   for (const e1 of edgeList) {
-    if (e1.next === -1) continue;
+    if (e1.next === -1) {
+      continue;
+    }
 
     const e2 = edgeMap.get(e1.next);
-    if (!e2) continue;
+    if (!e2) {
+      continue;
+    }
 
     const hash = edgeToString(e1.x, e1.y, e2.x, e2.y);
     if (drawnEdges.has(hash)) {

@@ -1,7 +1,28 @@
 import { describe, expect, test } from "vitest";
 import { EdgeContext } from "../src/edgeContext";
 import { P } from "../src/types";
-import { isConvexQuad, isDelaunay, getVertex, isEdgeEqual } from "../src/edges";
+import { isConvexQuad, isDelaunay, getVertex } from "../src/edges";
+import { pointsEqual } from "../src/checks";
+
+function isEdgeEqual(
+  ctx: EdgeContext,
+  edge: number,
+  e1x: number,
+  e1y: number,
+  e2x: number,
+  e2y: number,
+): boolean {
+  const aIdx = edge;
+  const bIdx = ctx.next[edge]!;
+  const ax = ctx.originX[aIdx]!;
+  const ay = ctx.originY[aIdx]!;
+  const bx = ctx.originX[bIdx]!;
+  const by = ctx.originY[bIdx]!;
+  return (
+    (pointsEqual(ax, ay, e1x, e1y) && pointsEqual(bx, by, e2x, e2y)) ||
+    (pointsEqual(ax, ay, e2x, e2y) && pointsEqual(bx, by, e1x, e1y))
+  );
+}
 
 describe("edges helpers", () => {
   test("isConvexQuad", () => {

@@ -14,7 +14,6 @@ import { EdgeContext } from "./edgeContext";
 import { StaticStack } from "./StaticStack";
 import { StaticQueue } from "./StaticQueue";
 import { StaticRing } from "./StaticRing";
-import { StaticDeque } from "./StaticDeque";
 import { isConvexQuad, isDelaunay, getVertex } from "./edges";
 
 function assert(condition: boolean, message: string): void {
@@ -398,12 +397,6 @@ export class GeometryRing extends StaticRing {
   }
 }
 
-export class GeometryDeque extends StaticDeque {
-  constructor() {
-    super(QUEUE_LIMIT);
-  }
-}
-
 // Reusable static instances to avoid allocation overhead
 const flipStack = new GeometryStack();
 const intersectQueue = new GeometryQueue();
@@ -491,9 +484,7 @@ function findStartEdgeForIntersect(
   return -1;
 }
 
-function setNextSafe(ctx: EdgeContext, edge: number, next: number): void {
-  ctx.setNext(edge, next);
-}
+// removed: setNextSafe passthrough; inline ctx.setNext directly
 
 export function getIntersecting(
   ctx: EdgeContext,
@@ -842,7 +833,7 @@ export function removeCollinear(
 
     if (isOnBoundary && collinear) {
       ctx.destroy(bEdge);
-      setNextSafe(ctx, aEdge, cEdge);
+      ctx.setNext(aEdge, cEdge);
       boundary.remove(bNode);
       if (boundary.length() < 3) {
         break;
@@ -940,9 +931,9 @@ export function fillCavity(ctx: EdgeContext, boundary: GeometryRing): void {
       const ac = createEdge(ctx, aPoint);
       setTwinPair(ctx, ca, ac);
 
-      setNextSafe(ctx, aEdge, bEdge);
-      setNextSafe(ctx, bEdge, ca);
-      setNextSafe(ctx, ca, aEdge);
+      ctx.setNext(aEdge, bEdge);
+      ctx.setNext(bEdge, ca);
+      ctx.setNext(ca, aEdge);
 
       flipStack.push(aEdge);
       flipStack.push(bEdge);
@@ -962,9 +953,9 @@ export function fillCavity(ctx: EdgeContext, boundary: GeometryRing): void {
     const aEdge = boundary.valueOf(first);
     const bEdge = boundary.valueOf(second);
     const cEdge = boundary.valueOf(third);
-    setNextSafe(ctx, aEdge, bEdge);
-    setNextSafe(ctx, bEdge, cEdge);
-    setNextSafe(ctx, cEdge, aEdge);
+    ctx.setNext(aEdge, bEdge);
+    ctx.setNext(bEdge, cEdge);
+    ctx.setNext(cEdge, aEdge);
   }
 
   flipEdges(ctx, flipStack);
