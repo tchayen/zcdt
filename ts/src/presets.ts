@@ -30,12 +30,7 @@ export const playground = (edges: EdgeContext): void => {
   insertOctagon(edges, 250, 370, 10);
 
   // River top.
-  insertPolygon(edges, [
-    P(272, 0),
-    P(286, 0),
-    P(286, 56),
-    P(272, 55),
-  ]);
+  insertPolygon(edges, [P(272, 0), P(286, 0), P(286, 56), P(272, 55)]);
 
   // River top second.
   insertPolygon(edges, [

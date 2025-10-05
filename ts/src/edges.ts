@@ -1,10 +1,9 @@
-import { orient2D, inCircle } from "./checks";
+import { orient2D, inCircle, pointsEqualCoords } from "./checks";
 import type { Point } from "./types";
 import { EdgeContext } from "./edgeContext";
-import { EPS } from "./constants";
 
 const pointsEqual = (a: Point, b: Point): boolean =>
-  Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS;
+  pointsEqualCoords(a.x, a.y, b.x, b.y);
 
 export const isConvexQuad = (ctx: EdgeContext, edge: number): boolean => {
   const twin = ctx.getTwin(edge);
@@ -39,18 +38,25 @@ export const isDelaunay = (ctx: EdgeContext, edge: number): boolean => {
   return inCircle(d, t1, t2, t3) < 0;
 };
 
-export const getVertex = (ctx: EdgeContext, p: Point, edge: number): number => {
-  const a = ctx.origin(edge);
-  if (pointsEqual(a, p)) return edge;
+export const getVertexCoords = (ctx: EdgeContext, px: number, py: number, edge: number): number => {
+  const ax = ctx.originXAt(edge);
+  const ay = ctx.originYAt(edge);
+  if (pointsEqualCoords(ax, ay, px, py)) return edge;
   const bIdx = ctx.getNext(edge);
   if (bIdx === -1) return -1;
-  const b = ctx.origin(bIdx);
-  if (pointsEqual(b, p)) return bIdx;
+  const bx = ctx.originXAt(bIdx);
+  const by = ctx.originYAt(bIdx);
+  if (pointsEqualCoords(bx, by, px, py)) return bIdx;
   const cIdx = ctx.getNext(bIdx);
   if (cIdx === -1) return -1;
-  const c = ctx.origin(cIdx);
-  if (pointsEqual(c, p)) return cIdx;
+  const cx = ctx.originXAt(cIdx);
+  const cy = ctx.originYAt(cIdx);
+  if (pointsEqualCoords(cx, cy, px, py)) return cIdx;
   return -1;
+};
+
+export const getVertex = (ctx: EdgeContext, p: Point, edge: number): number => {
+  return getVertexCoords(ctx, p.x, p.y, edge);
 };
 
 export const isEdgeEqual = (

@@ -1,7 +1,13 @@
 /// <reference types="vite/client" />
 
-import { EdgeContext } from './cdt/edgeContext';
-import { playground, pointRemoval, selfIntersecting, grid, tinySquare } from './cdt/presets';
+import { EdgeContext } from "./cdt/edgeContext";
+import {
+  playground,
+  pointRemoval,
+  selfIntersecting,
+  grid,
+  tinySquare,
+} from "./cdt/presets";
 
 let showLabels = false;
 let showEdges = true;
@@ -9,11 +15,11 @@ let selectedMap = 0;
 
 // Map of available presets
 const presets = [
-  { name: 'Playground', fn: playground },
-  { name: 'Point Removal', fn: pointRemoval },
-  { name: 'Self Intersecting', fn: selfIntersecting },
-  { name: 'Grid', fn: grid },
-  { name: 'Tiny Square', fn: tinySquare },
+  { name: "Playground", fn: playground },
+  { name: "Point Removal", fn: pointRemoval },
+  { name: "Self Intersecting", fn: selfIntersecting },
+  { name: "Grid", fn: grid },
+  { name: "Tiny Square", fn: tinySquare },
 ];
 
 // Create edge context with enough capacity
@@ -23,23 +29,25 @@ const edges = new EdgeContext(16000);
 function loadPreset(index: number): void {
   const preset = presets[index];
   if (!preset) return;
-  
+
   console.log(`Loading preset: ${preset.name}`);
-  
+
   try {
     // Measure CDT computation time
     const startTime = performance.now();
     preset.fn(edges);
     const endTime = performance.now();
     const duration = endTime - startTime;
-    
+
     console.log(`✅ ${preset.name} completed in ${duration.toFixed(2)}ms`);
     console.log(`   Created ${edges.count()} edges`);
-    console.log(`   Performance: ${(edges.count() / duration * 1000).toFixed(0)} edges/second`);
-    
-    // Measure rendering time with detailed breakdown
-    draw(true);
-    
+    console.log(
+      `   Performance: ${((edges.count() / duration) * 1000).toFixed(
+        0,
+      )} edges/second`,
+    );
+
+    draw();
   } catch (error) {
     console.error(`❌ Failed to load preset ${preset.name}:`, error);
   }
@@ -57,25 +65,25 @@ type HalfEdge = {
 function exportEdges(): HalfEdge[] {
   const result: HalfEdge[] = [];
   const capacity = edges.getCapacity();
-  
+
   for (let i = 0; i < capacity; i++) {
     if (!edges.isInUse(i)) continue;
-    
+
     const origin = edges.origin(i);
     const next = edges.getNext(i);
     const twin = edges.getTwin(i);
     const fixed = edges.isFixed(i);
-    
+
     result.push({
       x: origin.x,
       y: origin.y,
       next: next,
       twin: twin,
       fixed: fixed,
-      index: i
+      index: i,
     });
   }
-  
+
   return result;
 }
 
@@ -105,7 +113,10 @@ document.body.appendChild(controls);
 
 // Add preset selector
 const presetContainer = document.createElement("div");
-presetContainer.setAttribute("style", "display: flex; flex-direction: column; gap: 4px;");
+presetContainer.setAttribute(
+  "style",
+  "display: flex; flex-direction: column; gap: 4px;",
+);
 
 const presetLabel = document.createElement("label");
 presetLabel.textContent = "Preset:";
@@ -132,7 +143,10 @@ controls.appendChild(presetContainer);
 
 // Add checkboxes
 const checkboxes = document.createElement("div");
-checkboxes.setAttribute("style", "display: flex; flex-direction: column; gap: 4px;");
+checkboxes.setAttribute(
+  "style",
+  "display: flex; flex-direction: column; gap: 4px;",
+);
 controls.appendChild(checkboxes);
 
 function addCheckbox(label: string, checked: boolean, onChange: () => void) {
@@ -167,50 +181,73 @@ addCheckbox("show labels", showLabels, () => {
 // Add benchmark button
 const benchmarkButton = document.createElement("button");
 benchmarkButton.textContent = "Run Benchmark";
-benchmarkButton.setAttribute("style", "margin-top: 8px; padding: 6px 12px; font-size: 12px;");
+benchmarkButton.setAttribute(
+  "style",
+  "margin-top: 8px; padding: 6px 12px; font-size: 12px;",
+);
 benchmarkButton.addEventListener("click", runBenchmark);
 controls.appendChild(benchmarkButton);
 
 function runBenchmark() {
-  console.log("🚀 Running CDT Performance Benchmark...");
+  console.log("Running CDT Performance Benchmark...");
   console.log("================================================");
-  
-  const results: Array<{name: string, duration: number, edges: number}> = [];
-  
+
+  const results: Array<{ name: string; duration: number; edges: number }> = [];
+
   for (let i = 0; i < presets.length; i++) {
     const preset = presets[i];
-    console.log(`\n📊 Benchmarking ${preset.name}...`);
-    
-    // Run multiple times for accuracy
-    const runs = preset.name === 'Grid' ? 3 : 5; // Grid is slower
+    console.log(`\nBenchmarking ${preset.name}...`);
+
+    const runs = preset.name === "Grid" ? 50 : 1000;
     const durations: number[] = [];
-    
+
     for (let run = 0; run < runs; run++) {
       const start = performance.now();
       preset.fn(edges);
       const end = performance.now();
       durations.push(end - start);
     }
-    
+
     const avgDuration = durations.reduce((a, b) => a + b) / durations.length;
     const minDuration = Math.min(...durations);
     const maxDuration = Math.max(...durations);
     const edgeCount = edges.count();
-    
-    results.push({name: preset.name, duration: avgDuration, edges: edgeCount});
-    
-    console.log(`   ${runs} runs: ${minDuration.toFixed(2)}ms - ${maxDuration.toFixed(2)}ms`);
+
+    results.push({
+      name: preset.name,
+      duration: avgDuration,
+      edges: edgeCount,
+    });
+
+    console.log(
+      `   ${runs} runs: ${minDuration.toFixed(2)}ms - ${maxDuration.toFixed(
+        2,
+      )}ms`,
+    );
     console.log(`   Average: ${avgDuration.toFixed(2)}ms`);
     console.log(`   Edges: ${edgeCount}`);
-    console.log(`   Performance: ${(edgeCount / avgDuration * 1000).toFixed(0)} edges/second`);
+    console.log(
+      `   Performance: ${((edgeCount / avgDuration) * 1000).toFixed(
+        0,
+      )} edges/second`,
+    );
   }
-  
-  console.log("\n📈 BENCHMARK SUMMARY");
+
+  console.log("\nBENCHMARK SUMMARY");
   console.log("================================================");
-  results.forEach(result => {
-    console.log(`${result.name.padEnd(16)} | ${result.duration.toFixed(2).padStart(8)}ms | ${result.edges.toString().padStart(6)} edges | ${(result.edges / result.duration * 1000).toFixed(0).padStart(8)} edges/sec`);
+  results.forEach((result) => {
+    console.log(
+      `${result.name.padEnd(16)} | ${result.duration
+        .toFixed(2)
+        .padStart(8)}ms | ${result.edges.toString().padStart(6)} edges | ${(
+        (result.edges / result.duration) *
+        1000
+      )
+        .toFixed(0)
+        .padStart(8)} edges/sec`,
+    );
   });
-  
+
   // Restore original preset
   loadPreset(selectedMap);
 }
@@ -268,9 +305,7 @@ function handleZoom(e: WheelEvent) {
   draw();
 }
 
-function draw(measurePerformance = false) {
-  const drawStart = measurePerformance ? performance.now() : 0;
-  
+function draw() {
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   canvas.setAttribute(
@@ -282,13 +317,11 @@ function draw(measurePerformance = false) {
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   const points = new Set<string>();
   const drawnEdges = new Set<string>();
-  
-  const exportStart = measurePerformance ? performance.now() : 0;
+
   const edgeList = exportEdges();
-  const exportEnd = measurePerformance ? performance.now() : 0;
 
   function edgeToString(
     x1: number,
@@ -317,7 +350,7 @@ function draw(measurePerformance = false) {
 
   for (const e1 of edgeList) {
     if (e1.next === -1) continue;
-    
+
     const e2 = edgeMap.get(e1.next);
     if (!e2) continue;
 
@@ -328,7 +361,7 @@ function draw(measurePerformance = false) {
     drawnEdges.add(hash);
 
     const twinEdge = e1.twin !== -1 ? edgeMap.get(e1.twin) : null;
-    if (e1.fixed || (twinEdge?.fixed)) {
+    if (e1.fixed || twinEdge?.fixed) {
       ctx.strokeStyle = "rgba(0, 0, 0, 1)";
       ctx.lineWidth = (2 * dpr) / scale;
     } else {
@@ -357,21 +390,9 @@ function draw(measurePerformance = false) {
       ctx.fillText(`(${x.toFixed(1)}, ${y.toFixed(1)})`, x, y);
     }
   }
-  
-  if (measurePerformance) {
-    const drawEnd = performance.now();
-    const exportTime = exportEnd - exportStart;
-    const renderTime = drawEnd - (exportEnd || drawStart);
-    const totalTime = drawEnd - drawStart;
-    
-    console.log(`🎨 Rendering breakdown:`);
-    console.log(`   Export edges: ${exportTime.toFixed(2)}ms`);
-    console.log(`   Canvas draw: ${renderTime.toFixed(2)}ms`);
-    console.log(`   Total render: ${totalTime.toFixed(2)}ms`);
-  }
 }
 
 // Load initial preset
 loadPreset(selectedMap);
 
-console.log('TypeScript CDT Example loaded at', new Date());
+console.log("TypeScript CDT Example loaded at", new Date());

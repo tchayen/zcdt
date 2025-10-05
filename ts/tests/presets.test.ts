@@ -42,7 +42,7 @@ describe("presets", () => {
   test("playground preset creates expected number of elements", () => {
     const edges = new EdgeContext(10000);
     playground(edges);
-    
+
     // The playground should create a significant number of edges
     // due to all the squares, octagons, and polygons
     expect(edges.count()).toBeGreaterThan(100);
@@ -51,7 +51,7 @@ describe("presets", () => {
   test("grid preset creates many edges", () => {
     const edges = new EdgeContext(16000); // Use almost max capacity for 50x50 grid
     grid(edges);
-    
+
     // Grid creates 50x50 = 2500 squares, each with 4 edges
     // Plus the boundary square
     expect(edges.count()).toBeGreaterThan(5000);
@@ -59,15 +59,15 @@ describe("presets", () => {
 
   test("presets reset the edge context properly", () => {
     const edges = new EdgeContext(1000);
-    
+
     // Run one preset
     tinySquare(edges);
     const firstCount = edges.count();
-    
+
     // Run another preset
     selfIntersecting(edges);
     const secondCount = edges.count();
-    
+
     // The second preset should have reset and created its own structure
     expect(secondCount).not.toBe(firstCount);
   });
